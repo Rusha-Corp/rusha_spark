@@ -15,6 +15,8 @@ ARG SPARK_LOG_DIR=/opt/spark/logs
 ARG SPARK_MASTER_LOG=/opt/spark/logs/spark-master.out
 ARG SPARK_WORKER_LOG=/opt/spark/logs/spark-worker.out
 ARG SPARK_MASTER_WEBUI_PORT=8080
+ARG SPARK_WORKER_PORT=8081
+ARG SPARK_WORKER_WEBUI_PORT=8082
 ARG SPARK_MASTER_PORT=7077
 
 # Set Spark environment variables
