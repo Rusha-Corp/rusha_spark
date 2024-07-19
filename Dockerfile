@@ -13,6 +13,7 @@ ARG SPARK_LOG_DIR=/opt/spark/logs
 
 # master
 ARG SPARK_MASTER_LOG=/opt/spark/logs/spark-master.out
+ARG SPARK_WORKER_LOG=/opt/spark/logs/spark-worker.out
 ARG SPARK_MASTER_WEBUI_PORT=8080
 ARG SPARK_MASTER_PORT=7077
 
