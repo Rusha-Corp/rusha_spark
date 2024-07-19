@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "spark-container"
+version = "0.1.0"
+description = ""
+authors = ["Emmanuel <kipronofb@outlook.com>"]
+readme = "README.md"
+packages = [{include = "spark_container"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+jupyterlab = "^4.0.9"
+ipykernel = "^6.27.1"
+pyspark = "3.5.0"
+pandas = "^2.2.1"
+pyarrow = "^15.0.0"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
