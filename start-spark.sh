@@ -16,7 +16,7 @@ elif [ "$SPARK_WORKLOAD" == "worker" ];
 then
 
 cd /opt/spark/bin && ./spark-class org.apache.spark.deploy.worker.Worker \
-    --webui-port $SPARK_WORKER_WEBUI_PORT $SPARK_MASTER >> $SPARK_WORKER_LOG
+    --webui-port $SPARK_WORKER_WEBUI_PORT $SPARK_MASTER 
 
 elif [ "$SPARK_WORKLOAD" == "submit" ];
 then
