@@ -57,13 +57,11 @@ RUN mkdir -p $SPARK_LOG_DIR && \
 
 ENV PATH="/opt/spark/bin:${PATH}"
 
-
+USER root
+RUN apt update
 RUN apt install apt install dnsutils
 
-
-
 USER spark
-
 # Copy entrypoint script
 COPY start-spark.sh /start-spark.sh
 
