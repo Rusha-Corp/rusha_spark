@@ -59,7 +59,7 @@ ENV PATH="/opt/spark/bin:${PATH}"
 
 USER root
 RUN apt update
-RUN apt install dnsutils
+RUN apt install dnsutils -y
 
 USER spark
 # Copy entrypoint script
