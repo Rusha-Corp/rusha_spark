@@ -25,6 +25,7 @@ ENV SPARK_MASTER_PORT=${SPARK_MASTER_PORT} \
     SPARK_LOG_DIR=${SPARK_LOG_DIR} \
     SPARK_MASTER_LOG=${SPARK_MASTER_LOG} 
 
+
 # Copy JAR files
 RUN curl -L --output hadoop-aws-${HADOOP_VERSION}.jar  https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_VERSION}/hadoop-aws-${HADOOP_VERSION}.jar 
 RUN curl -L --output aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${AWS_SDK_VERSION}/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar 
@@ -50,20 +51,32 @@ RUN cp scala-library-2.12.4.jar ${SPARK_HOME}/jars/ && \
 RUN rm -rf hadoop-aws-${HADOOP_VERSION}.jar aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar spark-nlp_2.12-${SPARK_NLP_VERSION}.jar tensorflow-1.15.0.jar ndarray-0.4.0.jar tensorflow-core-platform-0.5.0.jar
 
 # Set up spark directories
-WORKDIR $SPARK_HOME
-RUN mkdir -p $SPARK_LOG_DIR && \
-    touch $SPARK_MASTER_LOG && \
-    ln -sf /dev/stdout $SPARK_MASTER_LOG 
-
 ENV PATH="/opt/spark/bin:${PATH}"
 
 USER root
 RUN apt update
 RUN apt install dnsutils -y
+RUN mkdir -p $SPARK_LOG_DIR && \
+    touch $SPARK_MASTER_LOG && \
+    ln -sf /dev/stdout $SPARK_MASTER_LOG 
 
-USER spark
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    libpq-dev python3-dev curl unzip zip git python3-pip
+
+RUN pip3 install --upgrade pip
+RUN pip3 install pandas numpy matplotlib seaborn jupyterlab
+RUN pip3 install pyarrow
+RUN pip3 install poetry
+
 # Copy entrypoint script
-COPY start-spark.sh /start-spark.sh
+COPY start_thrift_server.sh /start_thrift_server.sh
+COPY start_history_server.sh /start_history_server.sh
+COPY start_spark_worker.sh /start_spark_worker.sh
+COPY start_spark_master.sh /start_spark_master.sh
 
-# Set up entrypoint
-CMD ["/bin/bash", "/start-spark.sh"]
+RUN chmod +x /start_thrift_server.sh && \
+    chmod +x /start_history_server.sh && \
+    chmod +x /start_spark_worker.sh && \
+    chmod +x /start_spark_master.sh
