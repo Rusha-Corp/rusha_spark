@@ -38,10 +38,10 @@ ${SPARK_HOME}/bin/spark-submit \
   --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
   --conf spark.eventLog.enabled=true \
   --conf spark.eventLog.dir=${SPARK_LOG_DIR} \
-  --conf spark.driver.memory="${SPARK_DRIVER_MEMORY:-56g}" \
+  --conf spark.driver.memory="${SPARK_DRIVER_MEMORY:-32g}" \
   --conf spark.driver.maxResultSize="${SPARK_DRIVER_MAX_RESULT_SIZE:-32g}" \
-  --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY:-56g}" \
-  --conf spark.executor.memoryOverhead="${SPARK_EXECUTOR_MEMORY_OVERHEAD:-16g}" \
+  --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY:-32g}" \
+  --conf spark.executor.memoryOverhead="${SPARK_EXECUTOR_MEMORY_OVERHEAD:-4g}" \
   --conf spark.sql.shuffle.partitions=200 \
   --conf spark.sql.hive.thriftServer.async=false \
   --conf spark.driver.host=${SPARK_DRIVER_HOST} \
