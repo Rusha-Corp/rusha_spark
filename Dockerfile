@@ -11,21 +11,6 @@ ARG SPARK_NLP_VERSION=5.2.0
 ARG SPARK_LOG_DIR=/opt/spark/logs
 
 
-# master
-ARG SPARK_MASTER_LOG=/opt/spark/logs/spark-master.out
-ARG SPARK_WORKER_LOG=/opt/spark/logs/spark-worker.out
-ARG SPARK_MASTER_WEBUI_PORT=8080
-ARG SPARK_WORKER_PORT=8081
-ARG SPARK_WORKER_WEBUI_PORT=8082
-ARG SPARK_MASTER_PORT=7077
-
-# Set Spark environment variables
-ENV SPARK_MASTER_PORT=${SPARK_MASTER_PORT} \
-    SPARK_MASTER_WEBUI_PORT=${SPARK_MASTER_WEBUI_PORT} \
-    SPARK_LOG_DIR=${SPARK_LOG_DIR} \
-    SPARK_MASTER_LOG=${SPARK_MASTER_LOG} 
-
-
 # Copy JAR files
 RUN curl -L --output hadoop-aws-${HADOOP_VERSION}.jar  https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_VERSION}/hadoop-aws-${HADOOP_VERSION}.jar 
 RUN curl -L --output aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${AWS_SDK_VERSION}/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar 
@@ -75,8 +60,11 @@ COPY start_thrift_server.sh /start_thrift_server.sh
 COPY start_history_server.sh /start_history_server.sh
 COPY start_spark_worker.sh /start_spark_worker.sh
 COPY start_spark_master.sh /start_spark_master.sh
+COPY start_thrift_server_k8s.sh /start_thrift_server_k8s.sh
 
 RUN chmod +x /start_thrift_server.sh && \
     chmod +x /start_history_server.sh && \
     chmod +x /start_spark_worker.sh && \
-    chmod +x /start_spark_master.sh
+    chmod +x /start_spark_master.sh && \
+    chmod +x /start_thrift_server_k8s.sh
+    
