@@ -23,7 +23,7 @@ mkdir -p ${SPARK_LOG_DIR}
 # Start the Spark Thrift Server in standalone mode
 ${SPARK_HOME}/bin/spark-submit \
   --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2 \
-  --master ${SPARK_MASTER:-local[*]} \
+  --master "${SPARK_MASTER:-local[*]}" \
   --conf spark.sql.warehouse.dir=${SPARK_WAREHOUSE_DIR} \
   --conf spark.hadoop.hive.metastore.uris=${METASTORE_URIS} \
   --conf spark.sql.hive.thriftServer.singleSession=true \
