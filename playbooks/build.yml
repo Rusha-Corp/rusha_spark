@@ -1,13 +1,12 @@
 - name: Build Rusha Spark Docker image
+  hosts: localhost
   tasks:
   - name: Build openalex Docker image
     command: >
       docker buildx build
       --platform linux/amd64,linux/arm64
       --build-arg BUILDKIT_INLINE_CACHE=1
-      --secret id=id_rsa,src=/home/dev/.ssh/id_rsa
-      --secret id=id_rsa.pub,src=/home/dev/.ssh/id_rsa.pub
-      -t registry.bitkubeops.com/spark-image:latest
+      -t {{ registry }}/bitkubeops-spark:latest
       . --push
     args:
-      chdir: spark_openalex
+      chdir: "{{ project_dir }}"
