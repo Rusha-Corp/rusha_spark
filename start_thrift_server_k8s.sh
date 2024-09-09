@@ -28,7 +28,7 @@ mkdir -p ${SPARK_LOG_DIR}
 # Start the Spark Thrift Server in standalone mode
 ${SPARK_HOME}/bin/spark-submit \
     --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2 \
-    --master k8s://${SPARK_WAREHOUSE_DIR} \
+    --master k8s://${SPARK_MASTER} \
     --deploy-mode cluster \
     --name thriftServer \
     --conf spark.kubernetes.file.upload.path=s3a://owalake/k8s-spark-scripts/spark-uploads \
