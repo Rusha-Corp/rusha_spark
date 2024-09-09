@@ -29,10 +29,11 @@ mkdir -p ${SPARK_LOG_DIR}
 ${SPARK_HOME}/bin/spark-submit \
     --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2 \
     --master k8s://${SPARK_WAREHOUSE_DIR} \
-    --deploy-mode client \
+    --deploy-mode cluster \
     --name thriftServer \
     --conf spark.kubernetes.file.upload.path=s3a://owalake/k8s-spark-scripts/spark-uploads \
     --conf spark.kubernetes.executor.podTemplateFile=s3a://owalake/k8s-spark-scripts/executor.yml \
+    --conf spark.kubernetes.driver.podTemplateFile=s3a://owalake/k8s-spark-scripts/executor.yml \
     --conf spark.sql.warehouse.dir=${SPARK_WAREHOUSE_DIR} \
     --conf spark.hadoop.hive.metastore.uris=${METASTORE_URIS} \
     --conf spark.sql.hive.thriftServer.singleSession=true \
@@ -82,8 +83,14 @@ ${SPARK_HOME}/bin/spark-submit \
     --conf spark.kubernetes.authenticate.driver.serviceAccountName=${SPARK_DRIVER_SERVICE_ACCOUNT} \
     --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.claimName=OnDemand \
     --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.storageClass=standard-rwo \
-    --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.sizeLimit=200Gi \
+    --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.sizeLimit=50Gi \
     --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.accessModes[0]=ReadWriteOnce \
     --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.mount.path=/tmp \
     --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.mount.readOnly=false \
+    --conf spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-local-dir-2.options.claimName=OnDemand \
+    --conf spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-local-dir-2.options.storageClass=standard-rwo \
+    --conf spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-local-dir-2.options.sizeLimit=50Gi \
+    --conf spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-local-dir-2.options.accessModes[0]=ReadWriteOnce \
+    --conf spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-local-dir-2.mount.path=/tmp \
+    --conf spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-local-dir-2.mount.readOnly=false \
     --conf spark.sql.parquet.int96RebaseModeInWrite=CORRECTED 
