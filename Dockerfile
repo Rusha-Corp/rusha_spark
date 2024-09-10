@@ -56,8 +56,10 @@ COPY start_thrift_server.sh /start_thrift_server.sh
 COPY start_history_server.sh /start_history_server.sh
 COPY start_spark_worker.sh /start_spark_worker.sh
 COPY start_spark_master.sh /start_spark_master.sh
+COPY start_thrift_server_k8s.sh /start_thrift_server_k8s.sh
 
 RUN chmod +x /start_thrift_server.sh && \
     chmod +x /start_history_server.sh && \
     chmod +x /start_spark_worker.sh && \
-    chmod +x /start_spark_master.sh
+    chmod +x /start_spark_master.sh && \
+    chmod +x /start_thrift_server_k8s.sh

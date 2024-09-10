@@ -67,7 +67,7 @@ services:
     depends_on:
       - metastore
     restart: unless-stopped
-    entrypoint: /bin/bash -c /start_thrift_server.sh
+    entrypoint: /bin/bash -c /start_thrift_server_k8s.sh
     deploy:
       resources:
         limits:
