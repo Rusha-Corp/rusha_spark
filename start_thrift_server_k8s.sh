@@ -47,8 +47,6 @@ ${SPARK_HOME}/bin/spark-submit \
     --conf spark.driver.blockManager.port=${SPARK_DRIVER_BLOCK_MANAGER_PORT} \
     --conf spark.driver.host=${SPARK_DRIVER_HOST} \
     --conf spark.driver.bindAddress=0.0.0.0 \
-    --conf spark.eventLog.enabled=true \
-    --conf spark.eventLog.dir=${SPARK_LOG_DIR} \
     --conf spark.sql.catalogImplementation=hive \
     --conf spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider \
     --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension \
@@ -63,8 +61,11 @@ ${SPARK_HOME}/bin/spark-submit \
     --conf spark.eventLog.enabled=true \
     --conf spark.eventLog.dir=${SPARK_LOG_DIR} \
     --conf spark.driver.maxResultSize=${SPARK_DRIVER_MAX_RESULT_SIZE:-32g} \
-    --conf spark.executor.memory=${SPARK_EXECUTOR_MEMORY:-16g} \
     --conf spark.executor.memoryOverhead=${SPARK_EXECUTOR_MEMORY_OVERHEAD:-4g} \
+    --conf spark.executor.memory=${SPARK_EXECUTOR_MEMORY:-8g} \
+    --conf spark.driver.memory=${SPARK_DRIVER_MEMORY:-16g} \
+    --conf spark.executor.cores=${SPARK_EXECUTOR_CORES:-2} \
+    --conf spark.driver.cores=${SPARK_DRIVER_CORES:-4} \
     --conf spark.sql.hive.thriftServer.async=true \
     --conf spark.sql.thriftServer.incrementalCollect=true \
     --conf spark.kubernetes.container.image=${IMAGE} \
@@ -75,7 +76,7 @@ ${SPARK_HOME}/bin/spark-submit \
     --conf spark.kubernetes.executor.limit.memory=224g \
     --conf spark.dynamicAllocation.enabled=true \
     --conf spark.dynamicAllocation.minExecutors=1 \
-    --conf spark.dynamicAllocation.maxExecutors=5 \
+    --conf spark.dynamicAllocation.maxExecutors=10 \
     --conf spark.dynamicAllocation.initialExecutors=1 \
     --conf spark.dynamicAllocation.executorIdleTimeout=60s \
     --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=60s \
