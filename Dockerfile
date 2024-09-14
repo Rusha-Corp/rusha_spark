@@ -47,8 +47,6 @@ RUN apt-get update && \
     libpq-dev python3-dev curl unzip zip git python3-pip
 
 RUN pip3 install --upgrade pip
-RUN pip3 install pandas numpy matplotlib seaborn jupyterlab
-RUN pip3 install pyarrow
 RUN pip3 install poetry
 
 # Copy entrypoint script
