@@ -6,7 +6,7 @@
       docker buildx build
       --platform linux/amd64,linux/arm64
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t {{ registry }}/bitkubeops-spark:latest
+      -t {{ registry }}/rusha-spark-environment:3.5.0-scala2.12-java17-python3-ubuntu-latest
       . --push
     args:
       chdir: "{{ project_dir }}"
