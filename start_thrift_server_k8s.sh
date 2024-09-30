@@ -72,11 +72,9 @@ ${SPARK_HOME}/bin/spark-submit \
     --conf spark.kubernetes.container.image.pullPolicy=Always \
     --conf spark.kubernetes.driver.pod.name=${SPARK_DRIVER_POD_NAME} \
     --conf spark.kubernetes.namespace=${NAMESPACE} \
-    --conf spark.kubernetes.executor.limit.cores=68 \
-    --conf spark.kubernetes.executor.limit.memory=224g \
     --conf spark.dynamicAllocation.enabled=true \
     --conf spark.dynamicAllocation.minExecutors=1 \
-    --conf spark.dynamicAllocation.maxExecutors=10 \
+    --conf spark.dynamicAllocation.maxExecutors=3 \
     --conf spark.dynamicAllocation.initialExecutors=1 \
     --conf spark.dynamicAllocation.executorIdleTimeout=60s \
     --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=60s \
