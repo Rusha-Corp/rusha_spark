@@ -64,11 +64,11 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.hadoop.fs.s3a.path.style.access=true \
     --conf spark.eventLog.enabled=true \
     --conf spark.eventLog.dir="${SPARK_LOG_DIR}" \
-    --conf spark.driver.maxResultSize="${SPARK_DRIVER_MAX_RESULT_SIZE:-32g}" \
+    --conf spark.driver.maxResultSize="${SPARK_DRIVER_MAX_RESULT_SIZE:-64g}" \
     --conf spark.executor.memoryOverhead="${SPARK_EXECUTOR_MEMORY_OVERHEAD:-4g}" \
-    --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY:-32g}" \
-    --conf spark.driver.memory="${SPARK_DRIVER_MEMORY:-16g}" \
-    --conf spark.executor.cores="${SPARK_EXECUTOR_CORES:-4}" \
+    --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY:-8g}" \
+    --conf spark.driver.memory="${SPARK_DRIVER_MEMORY:-32g}" \
+    --conf spark.executor.cores="${SPARK_EXECUTOR_CORES:-2}" \
     --conf spark.driver.cores="${SPARK_DRIVER_CORES:-4}" \
     --conf spark.sql.hive.thriftServer.async=true \
     --conf spark.sql.thriftServer.incrementalCollect=true \
@@ -78,7 +78,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.kubernetes.namespace="${NAMESPACE}" \
     --conf spark.dynamicAllocation.enabled=true \
     --conf spark.dynamicAllocation.minExecutors=1 \
-    --conf spark.dynamicAllocation.maxExecutors=2 \
+    --conf spark.dynamicAllocation.maxExecutors=4 \
     --conf spark.dynamicAllocation.initialExecutors=1 \
     --conf spark.dynamicAllocation.executorIdleTimeout=60s \
     --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=60s \
