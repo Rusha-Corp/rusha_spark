@@ -97,7 +97,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.sql.adaptive.coalescePartitions.enabled=true \
     --conf spark.sql.adaptive.skewJoin.enabled=true \
     --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
-    --conf spark.shuffle.service.enabled=true \
+    # --conf spark.shuffle.service.enabled=true \
     --conf spark.shuffle.service.port=7337 \
     --conf spark.dynamicAllocation.shuffleTracking.enabled=true \
     --conf spark.shuffle.service.fetch.rdd.enabled=true \
