@@ -48,9 +48,9 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.sql.hive.thriftServer.singleSession=true \
     --conf spark.sql.hive.thriftServer.enable.doAs=false \
     --conf spark.sql.server.port="${SPARK_SQL_SERVER_PORT:-10000}" \
-    --conf spark.driver.port="${SPARK_DRIVER_PORT}" \
-    --conf spark.ui.port="${SPARK_UI_PORT}" \
-    --conf spark.driver.blockManager.port="${SPARK_DRIVER_BLOCK_MANAGER_PORT}" \
+    --conf spark.driver.port="${SPARK_DRIVER_PORT:-7077}" \
+    --conf spark.ui.port="${SPARK_UI_PORT:-4040}" \
+    --conf spark.driver.blockManager.port="${SPARK_DRIVER_BLOCK_MANAGER_PORT:-7078}" \
     --conf spark.driver.host="${SPARK_DRIVER_HOST}" \
     --conf spark.driver.bindAddress=0.0.0.0 \
     --conf spark.sql.catalogImplementation=hive \
@@ -98,6 +98,9 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.sql.adaptive.skewJoin.enabled=true \
     --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
     --conf spark.shuffle.service.enabled=true \
+    --conf spark.shuffle.service.port=7337 \
+    --conf spark.dynamicAllocation.shuffleTracking.enabled=true \
+    --conf spark.shuffle.service.fetch.rdd.enabled=true \
     --conf spark.sql.shuffle.partitions=200 \
     --conf spark.sql.files.maxPartitionBytes=128MB \
     --conf spark.sql.broadcastTimeout=1200
