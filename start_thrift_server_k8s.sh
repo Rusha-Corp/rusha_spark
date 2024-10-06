@@ -30,7 +30,7 @@ for var in "${env_vars[@]}"; do
     echo "$var=${!var}"
 done
 
-export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1024m -J-Xms512m"
+export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx4g -J-Xmx1024m -J-Xms512m"
 
 # Ensure necessary directories for Spark exist
 mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
@@ -97,7 +97,6 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.sql.adaptive.coalescePartitions.enabled=true \
     --conf spark.sql.adaptive.skewJoin.enabled=true \
     --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
-    # --conf spark.shuffle.service.enabled=true \
     --conf spark.shuffle.service.port=7337 \
     --conf spark.dynamicAllocation.shuffleTracking.enabled=true \
     --conf spark.shuffle.service.fetch.rdd.enabled=true \
