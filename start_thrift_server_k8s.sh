@@ -67,7 +67,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.driver.maxResultSize="${SPARK_DRIVER_MAX_RESULT_SIZE:-64g}" \
     --conf spark.executor.memoryOverhead="${SPARK_EXECUTOR_MEMORY_OVERHEAD:-4g}" \
     --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY:-8g}" \
-    --conf spark.driver.memory="${SPARK_DRIVER_MEMORY:-32g}" \
+    --conf spark.driver.memory="${SPARK_DRIVER_MEMORY:-16g}" \
     --conf spark.executor.cores="${SPARK_EXECUTOR_CORES:-2}" \
     --conf spark.driver.cores="${SPARK_DRIVER_CORES:-4}" \
     --conf spark.sql.hive.thriftServer.async=true \
@@ -103,4 +103,11 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.shuffle.service.fetch.rdd.enabled=true \
     --conf spark.sql.shuffle.partitions=200 \
     --conf spark.sql.files.maxPartitionBytes=128MB \
-    --conf spark.sql.broadcastTimeout=1200
+    --conf spark.sql.broadcastTimeout=1200 \
+    --conf "spark.sql.parquet.int96RebaseModeInWrite=CORRECTED" \
+    --conf "spark.speculation=true" \
+    --conf "spark.speculation.interval=100ms" \
+    --conf "spark.speculation.multiplier=1.5" \
+    --conf "spark.speculation.quantile=0.7" \
+    --conf "spark.sql.sources.partitionOverwriteMode=dynamic" \
+    --conf "spark.task.maxFailures=10"
