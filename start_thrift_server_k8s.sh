@@ -78,7 +78,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.kubernetes.namespace="${NAMESPACE}" \
     --conf spark.dynamicAllocation.enabled=true \
     --conf spark.dynamicAllocation.minExecutors=1 \
-    --conf spark.dynamicAllocation.maxExecutors=10 \
+    --conf spark.dynamicAllocation.maxExecutors=3 \
     --conf spark.dynamicAllocation.initialExecutors=1 \
     --conf spark.dynamicAllocation.executorIdleTimeout=60s \
     --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=60s \
