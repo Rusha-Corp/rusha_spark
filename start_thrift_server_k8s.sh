@@ -78,7 +78,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.kubernetes.namespace="${NAMESPACE}" \
     --conf spark.dynamicAllocation.enabled=true \
     --conf spark.dynamicAllocation.minExecutors=1 \
-    --conf spark.dynamicAllocation.maxExecutors=4 \
+    --conf spark.dynamicAllocation.maxExecutors=10 \
     --conf spark.dynamicAllocation.initialExecutors=1 \
     --conf spark.dynamicAllocation.executorIdleTimeout=60s \
     --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=60s \
@@ -107,7 +107,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf "spark.sql.parquet.int96RebaseModeInWrite=CORRECTED" \
     --conf "spark.speculation=true" \
     --conf "spark.speculation.interval=100ms" \
-    --conf "spark.speculation.multiplier=1.5" \
+    --conf "spark.speculation.multiplier=2" \
     --conf "spark.speculation.quantile=0.7" \
     --conf "spark.sql.sources.partitionOverwriteMode=dynamic" \
     --conf "spark.task.maxFailures=10"
