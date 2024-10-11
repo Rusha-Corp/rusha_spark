@@ -3,6 +3,15 @@
 # Exit on error
 set -e
 
+# Check if required environment variables are set
+: "${SPARK_MASTER:?Environment variable SPARK_MASTER is not set}"
+: "${SPARK_WORKER_CORES:?Environment variable SPARK_WORKER_CORES is not set}"
+: "${SPARK_WORKER_MEMORY:?Environment variable SPARK_WORKER_MEMORY is not set}"
+: "${SPARK_WORKER_PORT:?Environment variable SPARK_WORKER_PORT is not set}"
+: "${SPARK_WORKER_WEBUI_PORT:?Environment variable SPARK_WORKER_WEBUI_PORT is not set}"
+: "${SPARK_HOME:?Environment variable SPARK_HOME is not set}"
+: "${SPARK_LOG_DIR:?Environment variable SPARK_LOG_DIR is not set}"
+
 # Log environment variables (optional, for debugging purposes)
 echo "Starting Spark Worker with the following environment variables:"
 echo "SPARK_MASTER=${SPARK_MASTER}"
@@ -23,6 +32,5 @@ export SPARK_DAEMON_JAVA_OPTS="${SPARK_DAEMON_JAVA_OPTS} -Dspark.eventLog.enable
 exec ${SPARK_HOME}/bin/spark-class org.apache.spark.deploy.worker.Worker \
     --cores ${SPARK_WORKER_CORES} \
     --memory ${SPARK_WORKER_MEMORY} \
-    --port ${SPARK_WORKER_PORT} \
     --webui-port ${SPARK_WORKER_WEBUI_PORT} \
     ${SPARK_MASTER}
