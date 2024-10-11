@@ -3,6 +3,13 @@
 # Exit on error
 set -e
 
+# Check if required environment variables are set
+: "${SPARK_HOME:?SPARK_HOME is not set}"
+: "${SPARK_MASTER_HOST:?SPARK_MASTER_HOST is not set}"
+: "${SPARK_MASTER_PORT:?SPARK_MASTER_PORT is not set}"
+: "${SPARK_MASTER_WEBUI_PORT:?SPARK_MASTER_WEBUI_PORT is not set}"
+: "${SPARK_LOG_DIR:?SPARK_LOG_DIR is not set}"
+
 # Log environment variables (optional, for debugging purposes)
 echo "Starting Spark Master with the following environment variables:"
 echo "SPARK_HOME=${SPARK_HOME}"
