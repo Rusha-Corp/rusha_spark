@@ -32,5 +32,6 @@ export SPARK_DAEMON_JAVA_OPTS="${SPARK_DAEMON_JAVA_OPTS} -Dspark.eventLog.enable
 exec ${SPARK_HOME}/bin/spark-class org.apache.spark.deploy.worker.Worker \
     --cores ${SPARK_WORKER_CORES} \
     --memory ${SPARK_WORKER_MEMORY} \
+    --port ${SPARK_WORKER_PORT} \
     --webui-port ${SPARK_WORKER_WEBUI_PORT} \
     ${SPARK_MASTER}
