@@ -60,4 +60,4 @@ RUN chmod +x /start_thrift_server.sh && \
     chmod +x /start_history_server.sh && \
     chmod +x /start_spark_worker.sh && \
     chmod +x /start_spark_master.sh && \
-    chmod +x /start_thrift_server_k8s.sh
+    chmod +x /start_thrift_server_k8s.sh 
