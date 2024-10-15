@@ -45,7 +45,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.kubernetes.executor.podTemplateFile=s3a://owalake/k8s-spark-scripts/executor.yml \
     --conf spark.sql.warehouse.dir="${SPARK_WAREHOUSE_DIR}" \
     --conf spark.hadoop.hive.metastore.uris="${METASTORE_URIS}" \
-    --conf spark.sql.hive.thriftServer.singleSession=true \
+    --conf spark.sql.hive.thriftServer.singleSession=false \
     --conf spark.sql.hive.thriftServer.enable.doAs=false \
     --conf spark.sql.server.port="${SPARK_SQL_SERVER_PORT:-10000}" \
     --conf spark.driver.port="${SPARK_DRIVER_PORT:-7077}" \
