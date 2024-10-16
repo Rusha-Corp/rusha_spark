@@ -93,7 +93,9 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.kubernetes.executor.secretKeyRef.AWS_SECRET_ACCESS_KEY=thrift-spark-secret:aws-secret-access-key \
     --conf spark.kubernetes.executor.secretKeyRef.METASTORE_URI=thrift-spark-secret:metastore-uri \
     --conf spark.kubernetes.executor.secretKeyRef.WAREHOUSE=thrift-spark-secret:warehouse \
-    --conf spark.kubernetes.driver.ownPersistentVolumeClaim=false \
+    --conf spark.kubernetes.driver.ownPersistentVolumeClaim=true \
+    --conf spark.kubernetes.driver.reusePersistentVolumeClaim=true \
+    --conf spark.kubernetes.driver.waitToReusePersistentVolumeClaim=true \
     --conf spark.sql.adaptive.enabled=true \
     --conf spark.sql.adaptive.coalescePartitions.enabled=true \
     --conf spark.sql.adaptive.skewJoin.enabled=true \
