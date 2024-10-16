@@ -24,6 +24,7 @@ env_vars=(
     "IMAGE"
     "NAMESPACE"
     "SPARK_DRIVER_SERVICE_ACCOUNT"
+    "SPARK_DRIVER_POD_NAME"
 )
 
 for var in "${env_vars[@]}"; do
@@ -35,7 +36,30 @@ export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx4g -J-Xmx10
 # Ensure necessary directories for Spark exist
 mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
 
-# Start the Spark Thrift Server in standalone mode
+# Check for required environment variables and set defaults if not provided
+: "${SPARK_MASTER:?SPARK_MASTER is not set}"
+: "${SPARK_SQL_SERVER_PORT:=10000}"
+: "${SPARK_DRIVER_MEMORY:=32g}"
+: "${SPARK_EXECUTOR_MEMORY:=64g}"
+: "${SPARK_EXECUTOR_CORES:=8}"
+: "${SPARK_WAREHOUSE_DIR:?SPARK_WAREHOUSE_DIR is not set}"
+: "${METASTORE_URIS:?METASTORE_URIS is not set}"
+: "${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID is not set}"
+: "${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is not set}"
+: "${SPARK_HOME:?SPARK_HOME is not set}"
+: "${SPARK_LOG_DIR:=/tmp/spark-events}"
+: "${SPARK_DRIVER_MAX_RESULT_SIZE:=128g}"
+: "${SPARK_EXECUTOR_MEMORY_OVERHEAD:=8g}"
+: "${SPARK_DRIVER_HOST:?SPARK_DRIVER_HOST is not set}"
+: "${SPARK_DRIVER_PORT:=7077}"
+: "${SPARK_UI_PORT:=4040}"
+: "${SPARK_DRIVER_BLOCK_MANAGER_PORT:=7078}"
+: "${IMAGE:?IMAGE is not set}"
+: "${NAMESPACE:?NAMESPACE is not set}"
+: "${SPARK_DRIVER_SERVICE_ACCOUNT:?SPARK_DRIVER_SERVICE_ACCOUNT is not set}"
+: "${SPARK_DRIVER_POD_NAME:?SPARK_DRIVER_POD_NAME is not set}"
+
+"${SPARK_HOME}/bin/spark-submit" \
 "${SPARK_HOME}/bin/spark-submit" \
     --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2 \
     --master "k8s://https://${SPARK_MASTER}" \
