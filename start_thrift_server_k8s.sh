@@ -67,9 +67,9 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.driver.maxResultSize="${SPARK_DRIVER_MAX_RESULT_SIZE:-128g}" \
     --conf spark.executor.memoryOverhead="${SPARK_EXECUTOR_MEMORY_OVERHEAD:-32g}" \
     --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY:-64g}" \
-    --conf spark.driver.memory="${SPARK_DRIVER_MEMORY:-64g}" \
+    --conf spark.driver.memory="${SPARK_DRIVER_MEMORY:-32g}" \
     --conf spark.executor.cores="${SPARK_EXECUTOR_CORES:-8}" \
-    --conf spark.driver.cores="${SPARK_DRIVER_CORES:-8}" \
+    --conf spark.driver.cores="${SPARK_DRIVER_CORES:-4}" \
     --conf spark.sql.hive.thriftServer.async=true \
     --conf spark.sql.thriftServer.incrementalCollect=true \
     --conf spark.kubernetes.container.image="${IMAGE}" \
