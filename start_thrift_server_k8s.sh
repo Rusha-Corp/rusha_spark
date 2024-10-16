@@ -59,7 +59,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
 : "${SPARK_DRIVER_SERVICE_ACCOUNT:?SPARK_DRIVER_SERVICE_ACCOUNT is not set}"
 : "${SPARK_DRIVER_POD_NAME:?SPARK_DRIVER_POD_NAME is not set}"
 
-"${SPARK_HOME}/bin/spark-submit" \
+# Start Spark Thrift Server
 "${SPARK_HOME}/bin/spark-submit" \
     --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2 \
     --master "k8s://https://${SPARK_MASTER}" \
