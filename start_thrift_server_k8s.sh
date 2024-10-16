@@ -104,8 +104,6 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.dynamicAllocation.minExecutors=1 \
     --conf spark.dynamicAllocation.maxExecutors=3 \
     --conf spark.dynamicAllocation.initialExecutors=1 \
-    --conf spark.dynamicAllocation.executorIdleTimeout=60s \
-    --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=60s \
     --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.claimName=OnDemand \
     --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.storageClass=standard-rwo \
     --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.sizeLimit=50Gi \
