@@ -75,7 +75,6 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.driver.port="${SPARK_DRIVER_PORT:-7078}" \
     --conf spark.ui.port="${SPARK_UI_PORT:-4040}" \
     --conf spark.driver.blockManager.port="${SPARK_DRIVER_BLOCK_MANAGER_PORT:-7079}" \
-    --conf spark.driver.host="${SPARK_DRIVER_HOST}" \
     --conf spark.driver.bindAddress=0.0.0.0 \
     --conf spark.sql.catalogImplementation=hive \
     --conf spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider \
@@ -90,10 +89,10 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.eventLog.dir="${SPARK_LOG_DIR}" \
     --conf spark.driver.maxResultSize="${SPARK_DRIVER_MAX_RESULT_SIZE:-128g}" \
     --conf spark.executor.memoryOverhead="${SPARK_EXECUTOR_MEMORY_OVERHEAD:-8g}" \
-    --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY:-64g}" \
+    --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY:-32g}" \
     --conf spark.driver.memory="${SPARK_DRIVER_MEMORY:-32g}" \
     --conf spark.executor.cores="${SPARK_EXECUTOR_CORES:-8}" \
-    --conf spark.driver.cores="${SPARK_DRIVER_CORES:-4}" \
+    --conf spark.driver.cores="${SPARK_DRIVER_CORES:-8}" \
     --conf spark.sql.hive.thriftServer.async=true \
     --conf spark.sql.thriftServer.incrementalCollect=true \
     --conf spark.kubernetes.container.image="${IMAGE}" \
