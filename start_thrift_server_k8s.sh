@@ -130,4 +130,6 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf "spark.speculation.multiplier=2" \
     --conf "spark.speculation.quantile=0.7" \
     --conf "spark.sql.sources.partitionOverwriteMode=dynamic" \
-    --conf "spark.task.maxFailures=10"
+    --conf "spark.task.maxFailures=10" \
+    --conf spark.network.timeout=300s \
+    --conf spark.executor.heartbeatInterval=60s 
