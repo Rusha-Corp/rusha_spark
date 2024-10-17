@@ -126,7 +126,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.shuffle.service.fetch.rdd.enabled=true \
     --conf spark.sql.shuffle.partitions=200 \
     --conf spark.sql.files.maxPartitionBytes=128MB \
-    --conf "spark.sql.parquet.int96RebaseModeInWrite=CORRECTED" \
+    --conf "spark.sql.parquet.int96RebaseModeInWrite=LEGACY" \
     --conf "spark.speculation=true" \
     --conf "spark.speculation.interval=100ms" \
     --conf "spark.speculation.multiplier=2" \
