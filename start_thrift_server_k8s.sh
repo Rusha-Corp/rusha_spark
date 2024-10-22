@@ -133,4 +133,4 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf "spark.task.maxFailures=10" \
     --conf spark.network.timeout=300s \
     --conf spark.executor.heartbeatInterval=60s \
-    --conf spark.dynamicAllocation.executorIdleTimeout = 60s 
+    --conf spark.dynamicAllocation.executorIdleTimeout=60s 
