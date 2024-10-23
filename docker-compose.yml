@@ -1,74 +1,74 @@
 services:
-  # postgres:
-  #   image: postgres:13
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: password
-  #     POSTGRES_DB: postgres
-  #   volumes:
-  #     - $HOME/postgresql/dbs/openalex:/var/lib/postgresql/data
-  #   networks:
-  #     - spark-container-network
-  #   hostname: postgres
-  #   restart: unless-stopped
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "1"
-  #         memory: 4G
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    volumes:
+      - $HOME/postgresql/dbs/openalex:/var/lib/postgresql/data
+    networks:
+      - spark-container-network
+    hostname: postgres
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 4G
 
-  # metastore:
-  #   image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
-  #   ports:
-  #     - "9083:9083"
-  #   depends_on:
-  #     - postgres
-  #   networks:
-  #     - spark-container-network
-  #   environment:
-  #     - SERVICE_NAME=metastore  
-  #     - DB_DRIVER=postgres    
-  #     - VERBOSE=true
-  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-  #     - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-  #     - HADOOP_CLIENT_OPTS=-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres -Djavax.jdo.option.ConnectionUserName=postgres -Djavax.jdo.option.ConnectionPassword=password
-  #   restart: unless-stopped
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "1"
-  #         memory: 4G
+  metastore:
+    image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
+    ports:
+      - "9083:9083"
+    depends_on:
+      - postgres
+    networks:
+      - spark-container-network
+    environment:
+      - SERVICE_NAME=metastore  
+      - DB_DRIVER=postgres    
+      - VERBOSE=true
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - HADOOP_CLIENT_OPTS=-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres -Djavax.jdo.option.ConnectionUserName=postgres -Djavax.jdo.option.ConnectionPassword=password
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 4G
 
-  # spark-thrift-server:
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "10000:10000"
-  #   hostname: spark-thrift-server
-  #   environment:
-  #     - SPARK_SQL_SERVER_PORT=10000
-  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-  #     - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-  #     - SPARK_WAREHOUSE_DIR=${SPARK_WAREHOUSE_DIR}
-  #     - METASTORE_URIS=thrift://metastore:9083
-  #     - SPARK_LOG_DIR=/tmp/spark-events
-  #     - SPARK_DRIVER_HOST=spark-thrift-server
-  #   volumes:
-  #     - /tmp:/tmp
-  #   networks:
-  #     - spark-container-network
-  #   depends_on:
-  #     - metastore
-  #   restart: unless-stopped
-  #   entrypoint: /bin/bash -c /start_thrift_server_k8s.sh
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "8"
-  #         memory: 68G
+  spark-thrift-server:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "10000:10000"
+    hostname: spark-thrift-server
+    environment:
+      - SPARK_SQL_SERVER_PORT=10000
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - SPARK_WAREHOUSE_DIR=${SPARK_WAREHOUSE_DIR}
+      - METASTORE_URIS=thrift://metastore:9083
+      - SPARK_LOG_DIR=/tmp/spark-events
+      - SPARK_DRIVER_HOST=spark-thrift-server
+    volumes:
+      - /tmp:/tmp
+    networks:
+      - spark-container-network
+    depends_on:
+      - metastore
+    restart: unless-stopped
+    entrypoint: /bin/bash -c /start_thrift_server_k8s.sh
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
+          memory: 68G
 
   spark-history-server:
     build: 

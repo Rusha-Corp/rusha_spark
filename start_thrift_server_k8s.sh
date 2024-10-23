@@ -124,17 +124,17 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.shuffle.service.fetch.rdd.enabled=true \
     --conf spark.sql.shuffle.partitions=200 \
     --conf spark.sql.files.maxPartitionBytes=128MB \
-    --conf "spark.sql.parquet.int96RebaseModeInWrite=LEGACY" \
-    --conf "spark.speculation=true" \
-    --conf "spark.speculation.interval=100ms" \
-    --conf "spark.speculation.multiplier=2" \
-    --conf "spark.speculation.quantile=0.7" \
-    --conf "spark.sql.sources.partitionOverwriteMode=dynamic" \
-    --conf "spark.task.maxFailures=10" \
+    --conf spark.sql.parquet.int96RebaseModeInWrite=LEGACY \
+    --conf spark.speculation=true \
+    --conf spark.speculation.interval=100ms \
+    --conf spark.speculation.multiplier=2 \
+    --conf spark.speculation.quantile=0.7 \
+    --conf spark.sql.sources.partitionOverwriteMode=dynamic \
+    --conf spark.task.maxFailures=10 \
     --conf spark.network.timeout=300s \
     --conf spark.executor.heartbeatInterval=60s \
     --conf spark.dynamicAllocation.executorIdleTimeout=60s \
-    --conf hive.resultset.use.unique.column.names=false \
-    --conf hive.server2.thrift.resultset.default.fetch.size=5000 
+    --conf spark.sql.hive.resultset.use.unique.column.names=false \
+    --conf spark.sql.hive.server2.thrift.resultset.default.fetch.size=5000 
 
 
