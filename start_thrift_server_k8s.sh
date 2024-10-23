@@ -131,10 +131,8 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.speculation.quantile=0.7 \
     --conf spark.sql.sources.partitionOverwriteMode=dynamic \
     --conf spark.task.maxFailures=10 \
-    --conf spark.network.timeout=300s \
-    --conf spark.executor.heartbeatInterval=60s \
-    --conf spark.dynamicAllocation.executorIdleTimeout=60s \
+    --conf spark.network.timeout=600s \
+    --conf spark.executor.heartbeatInterval=100s \
+    --conf spark.dynamicAllocation.executorIdleTimeout=300s \
     --conf spark.sql.hive.resultset.use.unique.column.names=false \
-    --conf spark.sql.hive.server2.thrift.resultset.default.fetch.size=5000 
-
-
+    --conf spark.sql.hive.server2.thrift.resultset.default.fetch.size=10000
