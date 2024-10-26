@@ -88,7 +88,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.hadoop.fs.s3a.path.style.access=true \
     --conf spark.eventLog.enabled=true \
     --conf spark.eventLog.dir="${SPARK_LOG_DIR}" \
-    --conf spark.driver.maxResultSize="${SPARK_DRIVER_MAX_RESULT_SIZE:-128g}" \
+    --conf spark.driver.maxResultSize=16g \
     --conf spark.executor.memoryOverhead="${SPARK_EXECUTOR_MEMORY_OVERHEAD:-8g}" \
     --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY:-32g}" \
     --conf spark.driver.memory="${SPARK_DRIVER_MEMORY:-32g}" \
