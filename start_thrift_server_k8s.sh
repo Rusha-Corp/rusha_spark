@@ -137,4 +137,5 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.sql.hive.resultset.use.unique.column.names=false \
     --conf spark.sql.hive.server2.thrift.resultset.default.fetch.size=10000 \
     --conf spark.sql.hive.thriftServer.session.timeout=600s \
-    --conf spark.sql.hive.thriftServer.idle.session.timeout=600s
+    --conf spark.sql.hive.thriftServer.idle.session.timeout=600s \
+    --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=300s \
