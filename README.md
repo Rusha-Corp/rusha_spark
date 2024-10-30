@@ -1,135 +1,60 @@
-# Dockerfile Documentation
+# Spark Thrift Server Startup Script
 
-## Purpose
-This Dockerfile is designed to create a customized Spark container with specified environment variables and dependencies. It's intended for use in data engineering and analytics workflows.
+This script is used to start the Spark Thrift Server on Kubernetes with various configurations and environment variables.
 
-### Base Image
-```dockerfile
-FROM spark:3.5.0-scala2.12-java17-ubuntu
-```
-The Dockerfile is based on the Spark image with version 3.5.0, Scala 2.12, and Java 17 on an Ubuntu base.
+## Environment Variables
 
-### Environment Variables
-Several environment variables are defined to configure Spark and its dependencies.
+The following environment variables are used in the script:
 
-- **Spark Configuration**
-  - `SPARK_EXECUTOR_MEMORY`: Executor memory for Spark.
-  - `SPARK_EXECUTOR_CORES`: Number of executor cores.
-  - `SPARK_HOME`: Spark installation directory.
-  - `SPARK_VERSION`: Spark version.
-  - ... (and more)
+- `SPARK_MASTER`: The URL of the Spark master.
+- `SPARK_SQL_SERVER_PORT`: The port for the Spark SQL server (default: 10000).
+- `SPARK_DRIVER_MEMORY`: Memory allocated for the Spark driver (default: 32g).
+- `SPARK_EXECUTOR_MEMORY`: Memory allocated for Spark executors (default: 64g).
+- `SPARK_EXECUTOR_CORES`: Number of cores for Spark executors (default: 8).
+- `SPARK_WAREHOUSE_DIR`: Directory for Spark warehouse.
+- `METASTORE_URIS`: URIs for the Hive metastore.
+- `AWS_ACCESS_KEY_ID`: AWS access key ID.
+- `AWS_SECRET_ACCESS_KEY`: AWS secret access key.
+- `SPARK_HOME`: Path to the Spark home directory.
+- `SPARK_LOG_DIR`: Directory for Spark logs (default: /tmp/spark-events).
+- `SPARK_DRIVER_MAX_RESULT_SIZE`: Maximum result size for the Spark driver (default: 128g).
+- `SPARK_EXECUTOR_MEMORY_OVERHEAD`: Memory overhead for Spark executors (default: 8g).
+- `SPARK_DRIVER_HOST`: Host for the Spark driver.
+- `SPARK_DRIVER_PORT`: Port for the Spark driver (default: 7077).
+- `SPARK_UI_PORT`: Port for the Spark UI (default: 4040).
+- `SPARK_DRIVER_BLOCK_MANAGER_PORT`: Port for the Spark driver block manager (default: 7078).
+- `IMAGE`: Docker image for the Spark container.
+- `NAMESPACE`: Kubernetes namespace.
+- `SPARK_DRIVER_SERVICE_ACCOUNT`: Service account for the Spark driver.
+- `SPARK_DRIVER_POD_NAME`: Pod name for the Spark driver.
 
-- **AWS and Hadoop Configuration**
-  - `HADOOP_VERSION`: Version of Hadoop.
-  - `AWS_SDK_VERSION`: Version of AWS SDK.
-  
-- **Spark NLP Configuration**
-  - `SPARK_NLP_VERSION`: Version of Spark NLP.
+## Script Steps
 
-- **Python and User Configuration**
-  - `PYTHON_VERSION`: Python version.
-  - `USER`: User for Spark execution.
-  - `SSH_PRIVATE_KEY` and `SSH_PUBLIC_KEY`: SSH keys for user.
+1. **Log Environment Variables**: The script logs the values of the environment variables for debugging purposes.
+2. **Set Hadoop Client Options**: Sets the Hadoop client options for garbage collection and memory settings.
+3. **Ensure Necessary Directories Exist**: Creates the necessary directories for Spark logs if they do not exist.
+4. **Check Required Environment Variables**: Ensures that all required environment variables are set and assigns default values where applicable.
+5. **Start Spark Thrift Server**: Uses `spark-submit` to start the Spark Thrift Server with various configurations.
 
-### Dockerfile Steps
+## Spark Submit Configuration
 
-#### 1. Set Spark Environment Variables
-Spark environment variables are set based on the specified arguments.
+The `spark-submit` command is configured with the following options:
 
-#### 2. Install Dependencies and Tools
-Install necessary dependencies and tools for the Spark container.
+- `--class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2`: Specifies the main class for the Spark Thrift Server.
+- `--master "k8s://https://${SPARK_MASTER}"`: Specifies the master URL for Kubernetes.
+- `--deploy-mode client`: Specifies the deploy mode.
+- Various `--conf` options to configure Spark settings, including:
+    - Spark SQL warehouse directory.
+    - Hive metastore URIs.
+    - AWS credentials for S3 access.
+    - Spark event log settings.
+    - Memory and core settings for the driver and executors.
+    - Kubernetes-specific configurations such as container image, namespace, and service account.
+    - Dynamic allocation settings.
+    - Speculation settings.
+    - Network and timeout settings.
 
-#### 3. Install AWS CLI
-Install the AWS CLI to enable interaction with AWS services.
+## Usage
 
-#### 4. Copy JAR Files
-Download and copy various JAR files required for Spark, Hadoop, AWS SDK, Spark NLP, TensorFlow, and Delta.
+To use this script, ensure that all required environment variables are set and then execute the script:
 
-#### 5. Remove Unnecessary Files
-Remove temporary and unnecessary files after copying JARs.
-
-#### 6. Set Up Working Directory and Logs
-Set up the working directory for Spark and create log files.
-
-#### 7. Set Up User and Permissions
-Create a non-root user with specified permissions for Spark execution.
-
-#### 8. Copy SSH Keys and Configure
-Copy SSH keys for secure communication and configure SSH settings.
-
-#### 9. Copy Python Project Files and Install Dependencies
-Copy Python project files (pyproject.toml, poetry.lock) and install dependencies using Poetry.
-
-### Entrypoint and CMD
-```dockerfile
-COPY start-spark.sh /start-spark.sh
-CMD ["/bin/bash", "/start-spark.sh"]
-```
-The entry point is a script named `start-spark.sh` that controls the Spark workload (master, worker, or submit) based on the environment variable `SPARK_WORKLOAD`. The CMD instruction specifies the default command to execute when the container starts.
-
-# Start Script Documentation
-
-## Purpose
-The `start-spark.sh` script is responsible for launching Spark in different modes depending on the specified workload: master, worker, or submit.
-
-### Script Steps
-
-1. **Source Spark Environment**
-   ```bash
-   . "/opt/spark/bin/load-spark-env.sh"
-   ```
-   Source the Spark environment to set up necessary configurations.
-
-2. **Launch Spark Master**
-   ```bash
-   if [ "$SPARK_WORKLOAD" == "master" ]; then
-      export SPARK_MASTER_HOST=`hostname`
-      cd /opt/spark/bin && ./spark-class org.apache.spark.deploy.master.Master --ip $SPARK_MASTER_HOST --port $SPARK_MASTER_PORT --webui-port $SPARK_MASTER_WEBUI_PORT >> $SPARK_MASTER_LOG
-   ```
-
-   If the workload is specified as "master," set up and start the Spark master.
-
-3. **Launch Spark Worker**
-   ```bash
-   elif [ "$SPARK_WORKLOAD" == "worker" ]; then
-      cd /opt/spark/bin && ./spark-class org.apache.spark.deploy.worker.Worker --webui-port $SPARK_WORKER_WEBUI_PORT $SPARK_MASTER >> $SPARK_WORKER_LOG
-   ```
-
-   If the workload is specified as "worker," set up and start the Spark worker.
-
-4. **Handle Spark Submission (Placeholder)**
-   ```bash
-   elif [ "$SPARK_WORKLOAD" == "submit" ]; then
-      echo "SPARK SUBMIT"
-   ```
-
-   Placeholder for handling Spark submission (not implemented).
-
-5. **Handle Undefined Workload Type**
-   ```bash
-   else
-      echo "Undefined Workload Type $SPARK_WORKLOAD, must specify: master, worker, submit"
-   ```
-
-   Display a message if an undefined workload type is specified.
-
-### Usage
-To use this Docker image, run the container with the desired workload:
-
-- For Spark Master:
-  ```bash
-  docker run -e SPARK_WORKLOAD=master <image_name>
-  ```
-
-- For Spark Worker:
-  ```bash
-  docker run -e SPARK_WORKLOAD=worker <image_name>
-  ```
-
-- For Spark Submission (Placeholder):
-  ```bash
-  docker run -e SPARK_WORKLOAD=submit <image_name>
-  ```
-
-### Note
-Ensure that the necessary environment variables, such as `SPARK_MASTER_PORT` and `SPARK_WORKER_PORT`, are correctly configured for the intended Spark cluster setup. Adjustments may be needed based on specific requirements and configurations.
