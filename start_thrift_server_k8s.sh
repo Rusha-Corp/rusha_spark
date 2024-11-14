@@ -70,7 +70,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.sql.warehouse.dir="${SPARK_WAREHOUSE_DIR}" \
     --conf spark.hadoop.hive.metastore.uris="${METASTORE_URIS}" \
     --conf spark.sql.hive.thriftServer.singleSession=false \
-    --conf spark.sql.hive.thriftServer.enable.doAs=false \
+    --conf spark.sql.hive.thriftServer.enable.doAs=true \
     --conf spark.sql.server.port="${SPARK_SQL_SERVER_PORT:-10000}" \
     --conf spark.driver.port="${SPARK_DRIVER_PORT:-7078}" \
     --conf spark.ui.port="${SPARK_UI_PORT:-4040}" \
