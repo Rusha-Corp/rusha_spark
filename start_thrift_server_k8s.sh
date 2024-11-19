@@ -91,6 +91,10 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.driver.maxResultSize=16g \
     --conf spark.executor.memoryOverhead="${SPARK_EXECUTOR_MEMORY_OVERHEAD:-8g}" \
     --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY:-32g}" \
+    --conf spark.executor.memory.request="${SPARK_EXECUTOR_MEMORY:-32g}" \
+    --conf spark.executor.memory.limit="${SPARK_EXECUTOR_MEMORY:-32g}" \
+    --conf spark.driver.memory.request="${SPARK_DRIVER_MEMORY:-32g}" \
+    --conf spark.driver.memory.limit="${SPARK_DRIVER_MEMORY:-32g}" \
     --conf spark.driver.memory="${SPARK_DRIVER_MEMORY:-32g}" \
     --conf spark.executor.cores="${SPARK_EXECUTOR_CORES:-8}" \
     --conf spark.driver.cores="${SPARK_DRIVER_CORES:-8}" \
