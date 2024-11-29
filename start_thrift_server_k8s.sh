@@ -105,7 +105,6 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.kubernetes.driver.pod.name="${SPARK_DRIVER_POD_NAME}" \
     --conf spark.kubernetes.namespace="${NAMESPACE}" \
     --conf spark.dynamicAllocation.minExecutors=0 \
-    --conf spark.dynamicAllocation.maxExecutors="${MAX_EXECUTORS:-5}" \
     --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.claimName=OnDemand \
     --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.storageClass=standard-rwo \
     --conf spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-local-dir-1.options.sizeLimit=200Gi \
@@ -124,4 +123,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.executor.heartbeatInterval=100s \
     --conf spark.sql.hive.resultset.use.unique.column.names=false \
     --conf spark.cleaner.verbose=true \
+    --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=600s \
+    --conf spark.dynamicAllocation.enabled=true \
+    --conf spark.dynamicAllocation.shuffleTracking.enabled=true \
     --conf spark.cleaner.ttl=600 
