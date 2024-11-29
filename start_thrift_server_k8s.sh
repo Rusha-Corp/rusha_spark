@@ -88,7 +88,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.hadoop.fs.s3a.path.style.access=true \
     --conf spark.eventLog.enabled=true \
     --conf spark.eventLog.dir="${SPARK_LOG_DIR}" \
-    --conf spark.driver.maxResultSize=16g \
+    --conf spark.driver.maxResultSize=32g \
     --conf spark.executor.memoryOverhead="${SPARK_EXECUTOR_MEMORY_OVERHEAD:-8g}" \
     --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY:-32g}" \
     --conf spark.executor.memory.request="${SPARK_EXECUTOR_MEMORY:-32g}" \
@@ -139,11 +139,10 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.executor.heartbeatInterval=100s \
     --conf spark.dynamicAllocation.executorIdleTimeout=300s \
     --conf spark.sql.hive.resultset.use.unique.column.names=false \
-    --conf spark.sql.hive.server2.thrift.resultset.default.fetch.size=10000 \
     --conf spark.sql.hive.thriftServer.session.timeout=600s \
     --conf spark.sql.hive.thriftServer.idle.session.timeout=600s \
     --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=300s \
-    --conf spark.cleaner.referenceTracking.blocking=true \
     --conf spark.cleaner.periodicGC.interval=3600 \
     --conf spark.cleaner.verbose=true \
-    --conf spark.cleaner.ttl=3600
+    --conf spark.cleaner.ttl=3600 \
+    --conf spark.checkpoint.dir=s3a://owalake/spark/checkpoint 

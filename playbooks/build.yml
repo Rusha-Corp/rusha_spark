@@ -1,12 +1,24 @@
 - name: Build Rusha Spark Docker image
-  hosts: localhost
+  hosts: contabo_prod
+  remote_user: dev
   tasks:
+  - name: pull git repo
+    git:
+      repo: git@github.com:Rusha-Corp/rusha_spark_delta.git
+      dest: /tmp/rusha-spark-environment
+      version: main
+      force: yes
+
+  - name: set tag
+    command: git -C /tmp/rusha-spark-environment rev-parse --short HEAD
+    register: git_tag
+
   - name: Build openalex Docker image
     command: >
       docker buildx build
       --platform linux/amd64,linux/arm64
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t {{ registry }}/rusha-spark-environment:3.5.0-scala2.12-java17-python3.10.12-ubuntu-latest
+      -t {{ registry }}/rusha-spark-environment-3.5.0-scala2.12-java17-python3.10.12-ubuntu:{{ git_tag.stdout }}
       . --push
     args:
-      chdir: "{{ project_dir }}"
+      chdir: /tmp/rusha-spark-environment
