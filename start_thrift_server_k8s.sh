@@ -142,7 +142,7 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.sql.hive.thriftServer.session.timeout=600s \
     --conf spark.sql.hive.thriftServer.idle.session.timeout=600s \
     --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=300s \
-    --conf spark.cleaner.periodicGC.interval=3600 \
+    --conf spark.cleaner.periodicGC.interval=600 \
     --conf spark.cleaner.verbose=true \
     --conf spark.cleaner.ttl=600 \
     --conf spark.checkpoint.dir=s3a://owalake/spark/checkpoint 
