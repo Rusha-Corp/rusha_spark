@@ -126,4 +126,5 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=600s \
     --conf spark.dynamicAllocation.enabled=true \
     --conf spark.dynamicAllocation.shuffleTracking.enabled=true \
+    --conf spark.dynamicAllocation.maxExecutors=5 \
     --conf spark.cleaner.ttl=600 
