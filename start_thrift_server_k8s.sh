@@ -119,7 +119,10 @@ mkdir -p "${SPARK_LOG_DIR:-/tmp/spark-events}"
     --conf spark.kubernetes.driver.ownPersistentVolumeClaim=false \
     --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
     --conf spark.sql.parquet.int96RebaseModeInWrite=LEGACY \
-    --conf spark.network.timeout=600s \
+    --conf spark.thriftserver.thrift.requestTimeout=600 \
+    --conf spark.thriftserver.thrift.loginTimeout=600 \
+    --conf spark.network.timeout=2400 \
+    --conf spark.executor.heartbeatInterval=100 \
     --conf spark.executor.heartbeatInterval=100s \
     --conf spark.sql.hive.resultset.use.unique.column.names=false \
     --conf spark.cleaner.verbose=true \
