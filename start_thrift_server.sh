@@ -35,7 +35,7 @@ mkdir -p ${SPARK_LOG_DIR}
 # Start the Spark Thrift Server in standalone mode
 ${SPARK_HOME}/bin/spark-submit \
   --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2 \
-  --master "${SPARK_MASTER}" \
+  --master ${SPARK_MASTER} \
   --conf spark.sql.warehouse.dir=${SPARK_WAREHOUSE_DIR} \
   --conf spark.hadoop.hive.metastore.uris=${METASTORE_URIS} \
   --conf spark.sql.hive.thriftServer.singleSession=false \
@@ -50,10 +50,10 @@ ${SPARK_HOME}/bin/spark-submit \
   --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
   --conf spark.eventLog.enabled=true \
   --conf spark.eventLog.dir=${SPARK_LOG_DIR} \
-  --conf spark.driver.memory="${SPARK_DRIVER_MEMORY}" \
-  --conf spark.driver.maxResultSize="${SPARK_DRIVER_MAX_RESULT_SIZE}" \
-  --conf spark.executor.memory="${SPARK_EXECUTOR_MEMORY}" \
-  --conf spark.executor.memoryOverhead="${SPARK_EXECUTOR_MEMORY_OVERHEAD}" \
+  --conf spark.driver.memory=${SPARK_DRIVER_MEMORY} \
+  --conf spark.driver.maxResultSize=${SPARK_DRIVER_MAX_RESULT_SIZE} \
+  --conf spark.executor.memory=${SPARK_EXECUTOR_MEMORY} \
+  --conf spark.executor.memoryOverhead=${SPARK_EXECUTOR_MEMORY_OVERHEAD} \
   --conf spark.sql.shuffle.partitions=200 \
   --conf spark.sql.hive.thriftServer.async=false \
   --conf spark.driver.host=${SPARK_DRIVER_HOST} \
