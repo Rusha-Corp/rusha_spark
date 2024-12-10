@@ -27,6 +27,7 @@ echo "SPARK_BLOCKMANAGER_PORT=${SPARK_BLOCKMANAGER_PORT:-7078}"
 export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1024m -J-Xms512m"
 
 # Ensure the necessary directories for Spark exist
+SPARK_LOG_DIR=${SPARK_LOG_DIR:-/var/log/spark}
 mkdir -p ${SPARK_LOG_DIR}
 
 # Start the Spark Thrift Server in standalone mode
