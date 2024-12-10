@@ -18,9 +18,9 @@ services:
           memory: 4G
 
   metastore:
-    image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
+    image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/spark_delta:b6e44ab
     ports:
-      - "9083:9083"
+      - "9023:9023"
     depends_on:
       - postgres
     networks:
@@ -52,8 +52,8 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - SPARK_WAREHOUSE_DIR=${SPARK_WAREHOUSE_DIR}
-      - METASTORE_URIS=thrift://metastore:9083
+      - SPARK_WAREHOUSE_DIR=${WAREHOUSE}
+      - METASTORE_URIS=thrift://metastore:9023
       - SPARK_LOG_DIR=/tmp/spark-events
       - SPARK_DRIVER_HOST=spark-thrift-server
     volumes:
@@ -63,57 +63,57 @@ services:
     depends_on:
       - metastore
     restart: unless-stopped
-    entrypoint: /bin/bash -c /start_thrift_server_k8s.sh
+    entrypoint: /bin/bash -c /start_thrift_server_k2s.sh
     deploy:
       resources:
         limits:
-          cpus: "8"
-          memory: 68G
+          cpus: "2"
+          memory: 8G
 
-  spark-history-server:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "18080:18080"
-    hostname: spark-history-server
-    volumes:
-      - /tmp:/tmp
-    networks:
-      - spark-container-network
-    # depends_on:
-    #   - metastore
-    restart: unless-stopped
-    entrypoint: /bin/bash -c /start_history_server.sh
-    environment:
-      - SPARK_LOG_DIR=/tmp/spark-events
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 4G
+  # spark-history-server:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "12020:12020"
+  #   hostname: spark-history-server
+  #   volumes:
+  #     - /tmp:/tmp
+  #   networks:
+  #     - spark-container-network
+  #   # depends_on:
+  #   #   - metastore
+  #   restart: unless-stopped
+  #   entrypoint: /bin/bash -c /start_history_server.sh
+  #   environment:
+  #     - SPARK_LOG_DIR=/tmp/spark-events
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "1"
+  #         memory: 4G
 
-  shuffle-service:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "7337:7337"
-    hostname: shuffle-service
-    volumes:
-      - /tmp:/tmp
-    networks:
-      - spark-container-network
-    # depends_on:
-    #   - metastore
-    restart: unless-stopped
-    entrypoint: /bin/bash -c /start_shuffle_service.sh
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 4G
+  # shuffle-service:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "7337:7337"
+  #   hostname: shuffle-service
+  #   volumes:
+  #     - /tmp:/tmp
+  #   networks:
+  #     - spark-container-network
+  #   # depends_on:
+  #   #   - metastore
+  #   restart: unless-stopped
+  #   entrypoint: /bin/bash -c /start_shuffle_service.sh
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "1"
+  #         memory: 4G
 
 networks:
   spark-container-network:
-    external: true
+    driver: bridge
