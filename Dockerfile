@@ -1,24 +1,27 @@
 # Set versions as arguments for flexibility
 ARG SPARK_VERSION=3.5.3
+ARG SCALA_LIBRARY_VERSION=2.12
+
+# Base image for Spark
+FROM spark:${SPARK_VERSION}-scala${SCALA_LIBRARY_VERSION}-java17-python3-ubuntu
+
+# Redefine arguments for the build stage
+ARG SCALA_LIBRARY_VERSION=2.12
 ARG HADOOP_AWS_VERSION=3.4.1
 ARG SPARK_NLP_VERSION=5.2.0
 ARG DELTA_SPARK_VERSION=3.2.1
 ARG UNITYCATALOG_SPARK_VERSION=0.2.1
-ARG SCALA_LIBRARY_VERSION=2.12
 ARG DELTA_STORAGE_VERSION=3.2.1
 ARG ANTLR4_RUNTIME_VERSION=4.9.3
 ARG AWS_SDK_BUNDLE_VERSION=2.24.6
 ARG WILDFLY_OPENSSL_VERSION=1.1.3.Final
-
-# Base image for Spark
-FROM spark:${SPARK_VERSION}-scala${SCALA_LIBRARY_VERSION}-java17-python3-ubuntu
 
 # Define essential directories and environment variables
 ARG SPARK_HOME=/opt/spark
 ARG SPARK_LOG_DIR=/opt/spark/logs
 ENV PATH="/opt/spark/bin:${PATH}"
 
-# Download JAR dependencies
+# Download JAR dependencies using arguments
 RUN curl -L --output hadoop-aws-${HADOOP_AWS_VERSION}.jar \
     https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar && \
     curl -L --output spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar \
@@ -57,7 +60,6 @@ RUN rm -f hadoop-aws-${HADOOP_AWS_VERSION}.jar \
     wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar
 
 USER root
-
 # Install essential dependencies
 RUN apt-get update && \
     apt-get install -y \
@@ -73,11 +75,4 @@ COPY start_spark_worker.sh /start_spark_worker.sh
 COPY start_spark_master.sh /start_spark_master.sh
 COPY start_thrift_server_k8s.sh /start_thrift_server_k8s.sh
 
-RUN chmod +x /start_thrift_server.sh \
-    /start_history_server.sh \
-    /start_spark_worker.sh \
-    /start_spark_master.sh \
-    /start_thrift_server_k8s.sh
-
-# Set up non-root user (optional, but recommended for security)
-USER root
+# USER spark
