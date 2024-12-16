@@ -1,9 +1,8 @@
 # Set versions as arguments for flexibility
 ARG SPARK_VERSION=3.5.3
-ARG SCALA_LIBRARY_VERSION=2.12
 
 # Base image for Spark
-FROM spark:${SPARK_VERSION}-scala${SCALA_LIBRARY_VERSION}-java17-python3-ubuntu
+FROM apache/spark:3.5.3 AS builder
 
 # Redefine arguments for the build stage
 ARG SCALA_LIBRARY_VERSION=2.13
@@ -34,14 +33,17 @@ RUN rm -f delta-spark_${SCALA_LIBRARY_VERSION}-${DELTA_SPARK_VERSION}.jar \
     unitycatalog-spark_${SCALA_LIBRARY_VERSION}-${UNITYCATALOG_SPARK_VERSION}.jar \
     spark-hadoop-cloud_${SCALA_LIBRARY_VERSION}-${SPARK_HADOOP_CLOUD_VERSION}.jar
 
-# Install essential dependencies
 USER root
+# Install essential dependencies
 RUN apt-get update && \
     apt-get install -y \
     libpq-dev python3-dev curl unzip zip git python3-pip && \
     pip3 install --upgrade pip && \
     pip3 install poetry && \
     apt-get install -y dnsutils
+
+# Configure Python
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 # Copy and set permissions for custom scripts
 COPY start_thrift_server.sh /start_thrift_server.sh
@@ -50,5 +52,10 @@ COPY start_spark_worker.sh /start_spark_worker.sh
 COPY start_spark_master.sh /start_spark_master.sh
 COPY start_thrift_server_k8s.sh /start_thrift_server_k8s.sh
 
-# Configure Python
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+
+
+
+
+
+
+
