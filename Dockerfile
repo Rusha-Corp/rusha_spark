@@ -1,20 +1,21 @@
 # Set versions as arguments for flexibility
-ARG SPARK_VERSION=3.5.3
-ARG SCALA_LIBRARY_VERSION=2.12
+ARG SPARK_VERSION=4.0.0-preview1
+ARG SCALA_LIBRARY_VERSION=2.13
 
 # Base image for Spark
 FROM spark:${SPARK_VERSION}-scala${SCALA_LIBRARY_VERSION}-java17-python3-ubuntu
 
 # Redefine arguments for the build stage
-ARG SCALA_LIBRARY_VERSION=2.12
-ARG HADOOP_VERSION=3.3.4
+ARG SCALA_LIBRARY_VERSION=2.13
+ARG HADOOP_VERSION=3.4.1
 ARG SPARK_NLP_VERSION=5.2.0
 ARG DELTA_SPARK_VERSION=3.2.1
 ARG UNITYCATALOG_SPARK_VERSION=0.2.1
 ARG DELTA_STORAGE_VERSION=3.2.1
 ARG ANTLR4_RUNTIME_VERSION=4.9.3
-ARG AWS_SDK_BUNDLE_VERSION=1.12.623
+ARG AWS_SDK_BUNDLE_VERSION=2.29.34
 ARG WILDFLY_OPENSSL_VERSION=2.2.1
+ARG SPARK_HADOOP_CLOUD_VERSION=4.0.0-preview1
 
 # Define essential directories and environment variables
 ARG SPARK_HOME=/opt/spark
@@ -37,7 +38,9 @@ RUN curl -L --output hadoop-aws-${HADOOP_VERSION}.jar \
     curl -L --output aws-sdk-bundle-${AWS_SDK_BUNDLE_VERSION}.jar \
     https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/${AWS_SDK_BUNDLE_VERSION}/bundle-${AWS_SDK_BUNDLE_VERSION}.jar && \
     curl -L --output wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar \
-    https://repo1.maven.org/maven2/org/wildfly/openssl/wildfly-openssl/${WILDFLY_OPENSSL_VERSION}/wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar
+    https://repo1.maven.org/maven2/org/wildfly/openssl/wildfly-openssl/${WILDFLY_OPENSSL_VERSION}/wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar && \
+    curl -L --output spark-hadoop-cloud_${SCALA_LIBRARY_VERSION}-${SPARK_HADOOP_CLOUD_VERSION}.jar \
+    https://repo1.maven.org/maven2/org/apache/spark/spark-hadoop-cloud_${SCALA_LIBRARY_VERSION}/${SPARK_HADOOP_CLOUD_VERSION}/spark-hadoop-cloud_${SCALA_LIBRARY_VERSION}-${SPARK_HADOOP_CLOUD_VERSION}.jar
 
 # Copy JARs to Spark JARs directory
 RUN cp hadoop-aws-${HADOOP_VERSION}.jar ${SPARK_HOME}/jars/ && \
@@ -47,7 +50,8 @@ RUN cp hadoop-aws-${HADOOP_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp delta-storage-${DELTA_STORAGE_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp antlr4-runtime-${ANTLR4_RUNTIME_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp aws-sdk-bundle-${AWS_SDK_BUNDLE_VERSION}.jar ${SPARK_HOME}/jars/ && \
-    cp wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar ${SPARK_HOME}/jars/
+    cp wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar ${SPARK_HOME}/jars/ && \
+    cp spark-hadoop-cloud_${SCALA_LIBRARY_VERSION}-${SPARK_HADOOP_CLOUD_VERSION}.jar ${SPARK_HOME}/jars/
 
 # Clean up downloaded files to reduce image size
 RUN rm -f hadoop-aws-${HADOOP_VERSION}.jar \
@@ -57,10 +61,11 @@ RUN rm -f hadoop-aws-${HADOOP_VERSION}.jar \
     delta-storage-${DELTA_STORAGE_VERSION}.jar \
     antlr4-runtime-${ANTLR4_RUNTIME_VERSION}.jar \
     aws-sdk-bundle-${AWS_SDK_BUNDLE_VERSION}.jar \
-    wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar
+    wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar \
+    spark-hadoop-cloud_${SCALA_LIBRARY_VERSION}-${SPARK_HADOOP_CLOUD_VERSION}.jar
 
-USER root
 # Install essential dependencies
+USER root
 RUN apt-get update && \
     apt-get install -y \
     libpq-dev python3-dev curl unzip zip git python3-pip && \
