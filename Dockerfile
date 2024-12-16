@@ -76,3 +76,5 @@ COPY start_spark_master.sh /start_spark_master.sh
 COPY start_thrift_server_k8s.sh /start_thrift_server_k8s.sh
 
 # USER spark
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
