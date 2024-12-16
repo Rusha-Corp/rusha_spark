@@ -7,14 +7,14 @@ FROM spark:${SPARK_VERSION}-scala${SCALA_LIBRARY_VERSION}-java17-python3-ubuntu
 
 # Redefine arguments for the build stage
 ARG SCALA_LIBRARY_VERSION=2.12
-ARG HADOOP_AWS_VERSION=3.4.1
+ARG HADOOP_VERSION=3.3.6
 ARG SPARK_NLP_VERSION=5.2.0
 ARG DELTA_SPARK_VERSION=3.2.1
 ARG UNITYCATALOG_SPARK_VERSION=0.2.1
 ARG DELTA_STORAGE_VERSION=3.2.1
 ARG ANTLR4_RUNTIME_VERSION=4.9.3
 ARG AWS_SDK_BUNDLE_VERSION=2.24.6
-ARG WILDFLY_OPENSSL_VERSION=1.1.3.Final
+ARG WILDFLY_OPENSSL_VERSION=2.2.1
 
 # Define essential directories and environment variables
 ARG SPARK_HOME=/opt/spark
@@ -22,8 +22,12 @@ ARG SPARK_LOG_DIR=/opt/spark/logs
 ENV PATH="/opt/spark/bin:${PATH}"
 
 # Download JAR dependencies using arguments
-RUN curl -L --output hadoop-aws-${HADOOP_AWS_VERSION}.jar \
-    https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar && \
+RUN curl -L --output hadoop-aws-${HADOOP_VERSION}.jar \
+    https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_VERSION}/hadoop-aws-${HADOOP_VERSION}.jar && \
+    curl -L --output hadoop-common-${HADOOP_VERSION}.jar \
+    https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar && \
+    curl -L --output hadoop-client-${HADOOP_VERSION}.jar \
+    https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-client/${HADOOP_VERSION}/hadoop-client-${HADOOP_VERSION}.jar && \
     curl -L --output spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar \
     https://repo1.maven.org/maven2/com/johnsnowlabs/nlp/spark-nlp_${SCALA_LIBRARY_VERSION}/${SPARK_NLP_VERSION}/spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar && \
     curl -L --output delta-spark_${SCALA_LIBRARY_VERSION}-${DELTA_SPARK_VERSION}.jar \
@@ -37,35 +41,31 @@ RUN curl -L --output hadoop-aws-${HADOOP_AWS_VERSION}.jar \
     curl -L --output aws-sdk-bundle-${AWS_SDK_BUNDLE_VERSION}.jar \
     https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/${AWS_SDK_BUNDLE_VERSION}/bundle-${AWS_SDK_BUNDLE_VERSION}.jar && \
     curl -L --output wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar \
-    https://repo1.maven.org/maven2/org/wildfly/openssl/wildfly-openssl/${WILDFLY_OPENSSL_VERSION}/wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar && \
-    curl -L --output hadoop-common-3.4.1.jar \
-    https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.4.1/hadoop-common-3.4.1.jar && \
-    curl -L --output hadoop-client-3.4.1.jar \
-    https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-client/3.4.1/hadoop-client-3.4.1.jar
+    https://repo1.maven.org/maven2/org/wildfly/openssl/wildfly-openssl/${WILDFLY_OPENSSL_VERSION}/wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar
 
 # Copy JARs to Spark JARs directory
-RUN cp hadoop-aws-${HADOOP_AWS_VERSION}.jar ${SPARK_HOME}/jars/ && \
+RUN cp hadoop-aws-${HADOOP_VERSION}.jar ${SPARK_HOME}/jars/ && \
+    cp hadoop-common-${HADOOP_VERSION}.jar ${SPARK_HOME}/jars/ && \
+    cp hadoop-client-${HADOOP_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp delta-spark_${SCALA_LIBRARY_VERSION}-${DELTA_SPARK_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp unitycatalog-spark_${SCALA_LIBRARY_VERSION}-${UNITYCATALOG_SPARK_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp delta-storage-${DELTA_STORAGE_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp antlr4-runtime-${ANTLR4_RUNTIME_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp aws-sdk-bundle-${AWS_SDK_BUNDLE_VERSION}.jar ${SPARK_HOME}/jars/ && \
-    cp wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar ${SPARK_HOME}/jars/ && \
-    cp hadoop-common-3.4.1.jar ${SPARK_HOME}/jars/ && \
-    cp hadoop-client-3.4.1.jar ${SPARK_HOME}/jars/
+    cp wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar ${SPARK_HOME}/jars/
 
 # Clean up downloaded files to reduce image size
-RUN rm -f hadoop-aws-${HADOOP_AWS_VERSION}.jar \
+RUN rm -f hadoop-aws-${HADOOP_VERSION}.jar \
+    hadoop-common-${HADOOP_VERSION}.jar \
+    hadoop-client-${HADOOP_VERSION}.jar \
     spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar \
     delta-spark_${SCALA_LIBRARY_VERSION}-${DELTA_SPARK_VERSION}.jar \
     unitycatalog-spark_${SCALA_LIBRARY_VERSION}-${UNITYCATALOG_SPARK_VERSION}.jar \
     delta-storage-${DELTA_STORAGE_VERSION}.jar \
     antlr4-runtime-${ANTLR4_RUNTIME_VERSION}.jar \
     aws-sdk-bundle-${AWS_SDK_BUNDLE_VERSION}.jar \
-    wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar \
-    hadoop-common-3.4.1.jar \
-    hadoop-client-3.4.1.jar
+    wildfly-openssl-${WILDFLY_OPENSSL_VERSION}.jar
 
 USER root
 # Install essential dependencies
@@ -83,6 +83,5 @@ COPY start_spark_worker.sh /start_spark_worker.sh
 COPY start_spark_master.sh /start_spark_master.sh
 COPY start_thrift_server_k8s.sh /start_thrift_server_k8s.sh
 
-# USER spark
-
+# Configure Python
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
