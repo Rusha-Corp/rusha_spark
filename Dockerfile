@@ -24,10 +24,6 @@ ENV PATH="/opt/spark/bin:${PATH}"
 # Download JAR dependencies using arguments
 RUN curl -L --output hadoop-aws-${HADOOP_VERSION}.jar \
     https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_VERSION}/hadoop-aws-${HADOOP_VERSION}.jar && \
-    curl -L --output hadoop-common-${HADOOP_VERSION}.jar \
-    https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar && \
-    curl -L --output hadoop-client-${HADOOP_VERSION}.jar \
-    https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-client/${HADOOP_VERSION}/hadoop-client-${HADOOP_VERSION}.jar && \
     curl -L --output spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar \
     https://repo1.maven.org/maven2/com/johnsnowlabs/nlp/spark-nlp_${SCALA_LIBRARY_VERSION}/${SPARK_NLP_VERSION}/spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar && \
     curl -L --output delta-spark_${SCALA_LIBRARY_VERSION}-${DELTA_SPARK_VERSION}.jar \
@@ -45,8 +41,6 @@ RUN curl -L --output hadoop-aws-${HADOOP_VERSION}.jar \
 
 # Copy JARs to Spark JARs directory
 RUN cp hadoop-aws-${HADOOP_VERSION}.jar ${SPARK_HOME}/jars/ && \
-    cp hadoop-common-${HADOOP_VERSION}.jar ${SPARK_HOME}/jars/ && \
-    cp hadoop-client-${HADOOP_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp delta-spark_${SCALA_LIBRARY_VERSION}-${DELTA_SPARK_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp unitycatalog-spark_${SCALA_LIBRARY_VERSION}-${UNITYCATALOG_SPARK_VERSION}.jar ${SPARK_HOME}/jars/ && \
@@ -57,8 +51,6 @@ RUN cp hadoop-aws-${HADOOP_VERSION}.jar ${SPARK_HOME}/jars/ && \
 
 # Clean up downloaded files to reduce image size
 RUN rm -f hadoop-aws-${HADOOP_VERSION}.jar \
-    hadoop-common-${HADOOP_VERSION}.jar \
-    hadoop-client-${HADOOP_VERSION}.jar \
     spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar \
     delta-spark_${SCALA_LIBRARY_VERSION}-${DELTA_SPARK_VERSION}.jar \
     unitycatalog-spark_${SCALA_LIBRARY_VERSION}-${UNITYCATALOG_SPARK_VERSION}.jar \
