@@ -1,6 +1,6 @@
 - name: Build Rusha Spark Docker image
-  hosts: contabo_prod
-  remote_user: dev
+  hosts: localhost
+  # remote_user: dev
   tasks:
   - name: pull git repo
     git:
@@ -16,9 +16,9 @@
   - name: Build openalex Docker image
     command: >
       docker buildx build
-      --platform linux/amd64
+      --platform linux/amd64,linux/arm64
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t {{ registry }}/rusha-spark-environment-3.5.0-scala2.12-java17-python3.10.12-ubuntu:{{ git_tag.stdout }}
+      -t {{ registry }}/rusha-spark-environment-3.5.3-scala2.12-java17-python3.10.12-ubuntu:{{ git_tag.stdout }}
       . --push
     args:
       chdir: /tmp/rusha-spark-environment
