@@ -13,26 +13,20 @@ ARG SPARK_HOME=/opt/spark
 ARG SPARK_LOG_DIR=/opt/spark/logs
 
 # Copy JAR files
-RUN curl -L --output hadoop-aws-${HADOOP_VERSION}.jar  https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_VERSION}/hadoop-aws-${HADOOP_VERSION}.jar 
+RUN curl -L --output hadoop-aws-${HADOOP_AWS_VERSION}.jar  https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar 
 RUN curl -L --output spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar  https://repo1.maven.org/maven2/com/johnsnowlabs/nlp/spark-nlp_${SCALA_LIBRARY_VERSION}/${SPARK_NLP_VERSION}/spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar 
 RUN curl -L --output delta-spark_${SCALA_LIBRARY_VERSION}-${DELTA_SPARK_VERSION}.jar https://repo1.maven.org/maven2/io/delta/delta-spark_${SCALA_LIBRARY_VERSION}/${DELTA_SPARK_VERSION}/delta-spark_${SCALA_LIBRARY_VERSION}-${DELTA_SPARK_VERSION}.jar 
 RUN curl -L --output unitycatalog-spark_${SCALA_LIBRARY_VERSION}-${UNITYCATALOG_SPARK_VERSION}.jar  https://repo1.maven.org/maven2/io/unitycatalog/unitycatalog-spark_${SCALA_LIBRARY_VERSION}/${UNITYCATALOG_SPARK_VERSION}/unitycatalog-spark_${SCALA_LIBRARY_VERSION}-${UNITYCATALOG_SPARK_VERSION}.jar
 
 RUN cp delta-spark_${SCALA_LIBRARY_VERSION}-${DELTA_SPARK_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar ${SPARK_HOME}/jars/ && \
-    cp hadoop-aws-${HADOOP_VERSION}.jar ${SPARK_HOME}/jars/ && \
+    cp hadoop-aws-${HADOOP_AWS_VERSION}.jar ${SPARK_HOME}/jars/ && \
     cp unitycatalog-spark_${SCALA_LIBRARY_VERSION}-${UNITYCATALOG_SPARK_VERSION}.jar ${SPARK_HOME}/jars/
 
 # Remove unnecessary files
-RUN rm -rf hadoop-aws-${HADOOP_VERSION}.jar \
-    aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar \
+RUN rm -rf hadoop-aws-${HADOOP_AWS_VERSION}.jar \
     spark-nlp_${SCALA_LIBRARY_VERSION}-${SPARK_NLP_VERSION}.jar \
-    tensorflow-${TENSORFLOW_VERSION}.jar \
-    ndarray-${NDARRAY_VERSION}.jar \
-    tensorflow-core-platform-${TENSORFLOW_CORE_PLATFORM_VERSION}.jar \
     delta-spark_${SCALA_LIBRARY_VERSION}-${DELTA_SPARK_VERSION}.jar \
-    delta-storage-${DELTA_STORAGE_VERSION}.jar \
-    scala-library-${SCALA_LIBRARY_VERSION}.jar \
     unitycatalog-spark_${SCALA_LIBRARY_VERSION}-${UNITYCATALOG_SPARK_VERSION}.jar
 
 # Set up spark directories
