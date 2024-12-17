@@ -76,7 +76,7 @@ RUN python3 --version && pip3 --version
 
 # Download and verify Apache Spark
 RUN set -eux; \
-    SPARK_TGZ_URL=https://downloads.apache.org/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}-scala${SCALA_VERSION}.tgz; \
+    SPARK_TGZ_URL=https://downloads.apache.org/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz; \
     SPARK_TGZ_ASC_URL=${SPARK_TGZ_URL}.asc; \
     \
     # Create temporary working directory
@@ -88,7 +88,7 @@ RUN set -eux; \
     \
     # Extract Spark and clean up
     tar -xzf spark.tgz -C /opt; \
-    mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}-scala${SCALA_VERSION} ${SPARK_HOME}; \
+    mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} ${SPARK_HOME}; \
     rm -rf "$SPARK_TMP"
 
 # Add entrypoint scripts
