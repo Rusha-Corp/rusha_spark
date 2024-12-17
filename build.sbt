@@ -1,6 +1,6 @@
 name := "spark-unity-catalog"
 version := "1.0"
-scalaVersion := "2.13.13"  // Use a Scala version compatible with Spark
+scalaVersion := "2.12.19"  // Use a Scala version compatible with Spark
 javacOptions ++= Seq("-source", "17", "-target", "17")  // Java 17 compatibility
 
 libraryDependencies ++= Seq(

@@ -28,7 +28,7 @@ FROM openjdk:17-jdk-slim AS runtime
 # Set Spark version, Hadoop version, and paths
 ARG SPARK_VERSION=3.5.3
 ARG HADOOP_VERSION=3
-ARG SCALA_VERSION=2.13
+ARG SCALA_VERSION=2.12
 ENV SPARK_HOME=/opt/spark
 ENV PATH=${SPARK_HOME}/bin:${SPARK_HOME}/sbin:$PATH
 
