@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "spark-environment"
+name = "rusha-spark"
 version = "0.1.0"
 description = ""
 authors = ["Emmanuel <kipronofb@outlook.com>"]

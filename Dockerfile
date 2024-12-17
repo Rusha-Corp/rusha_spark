@@ -1,4 +1,6 @@
-# Base image with SBT and OpenJDK
+# ------------------------------
+# Stage 1: Build Fat JAR with SBT
+# ------------------------------
 FROM openjdk:17-jdk-slim AS build
 
 RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https
@@ -13,38 +15,64 @@ RUN apt-get install sbt -y
 # Set working directory
 WORKDIR /app
 
-# Copy project files
+# Copy project files and build the Fat JAR
 COPY . /app
-
-# Build Fat JAR
 RUN sbt assembly
 
+# ------------------------------
+# Stage 2: Runtime Spark Setup
+# ------------------------------
+FROM openjdk:17-jdk-slim AS runtime
 
-# FROM openjdk:17-jdk-slim AS runtime
+# Set Spark version, Hadoop version, and paths
+ARG SPARK_VERSION=3.5.3
+ARG HADOOP_VERSION=3
+ARG SCALA_VERSION=2.13
+ENV SPARK_HOME=/opt/spark
+ENV PATH=${SPARK_HOME}/bin:${SPARK_HOME}/sbin:$PATH
 
-# # Copy Fat JAR from previous stage
-# COPY --from=0 /app/target/scala-2.13/spark-unity-catalog-1.0.jar /opt/spark/jars/
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    tar \
+    bash \
+    python3 \
+    python3-pip \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
 
-# ENV PATH="/opt/spark/bin:${PATH}"
-# ARG SPARK_HOME=/opt/spark
+# Download and verify Apache Spark
+RUN set -eux; \
+    SPARK_TGZ_URL=https://downloads.apache.org/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}-scala${SCALA_VERSION}.tgz; \
+    SPARK_TGZ_ASC_URL=${SPARK_TGZ_URL}.asc; \
+    \
+    # Create temporary working directory
+    SPARK_TMP="$(mktemp -d)" && cd "$SPARK_TMP"; \
+    \
+    # Download Spark and signature
+    wget -q -O spark.tgz "$SPARK_TGZ_URL"; \
+    wget -q -O spark.tgz.asc "$SPARK_TGZ_ASC_URL"; \
+    \
+    # Extract Spark and clean up
+    tar -xzf spark.tgz -C /opt; \
+    mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}-scala${SCALA_VERSION} ${SPARK_HOME}; \
+    rm -rf "$SPARK_TMP"
 
-# RUN apt update
-# RUN apt install dnsutils -y
+# Add entrypoint scripts
+COPY scripts/start_thrift_server.sh /start_thrift_server.sh
+COPY scripts/start_history_server.sh /start_history_server.sh
+COPY scripts/start_spark_worker.sh /start_spark_worker.sh
+COPY scripts/start_spark_master.sh /start_spark_master.sh
+COPY scripts/start_thrift_server_k8s.sh /start_thrift_server_k8s.sh
 
-# # Install dependencies
-# RUN apt-get update && \
-#     apt-get install -y python3.11 \
-#     libpq-dev python3-dev curl unzip zip git python3-pip
+# Make scripts executable
+RUN chmod +x /start_*.sh
 
-# RUN pip3 install --upgrade pip
-# RUN pip3 install poetry
+# Configure Python
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
-# # Copy entrypoint script
-# COPY scripts/start_thrift_server.sh /start_thrift_server.sh
-# COPY scripts/start_history_server.sh /start_history_server.sh
-# COPY scripts/start_spark_worker.sh /start_spark_worker.sh
-# COPY scripts/start_spark_master.sh /start_spark_master.sh
-# COPY scripts/start_thrift_server_k8s.sh /start_thrift_server_k8s.sh
+# Copy Fat JAR dependencies from build stage
+COPY --from=build /app/target/lib/* ${SPARK_HOME}/jars/
 
-
-
+# Set default command
+CMD ["bash"]

@@ -10,7 +10,23 @@ libraryDependencies ++= Seq(
     "org.apache.spark" %% "spark-hadoop-cloud" % "3.5.3",
 )
 
-assemblyMergeStrategy in assembly := {
-    case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-    case x => MergeStrategy.first
+assembly / assemblyMergeStrategy := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
 }
+
+// Task to copy dependencies to the target directory
+val copyDependencies = taskKey[Unit]("Copy dependencies to target directory")
+
+copyDependencies := {
+    val updateReport = update.value
+    val targetDir = target.value / "lib"
+    IO.createDirectory(targetDir)
+    val jars = updateReport.select(configurationFilter("compile"))
+    jars.foreach { jar =>
+        IO.copyFile(jar, targetDir / jar.getName)
+    }
+}
+
+// Ensure the copyDependencies task runs after compile
+Compile / compile := (Compile / compile).dependsOn(copyDependencies).value
