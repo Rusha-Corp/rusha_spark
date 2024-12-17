@@ -8,6 +8,7 @@ libraryDependencies ++= Seq(
     "org.apache.spark" %% "spark-sql" % "3.5.3" % Provided,
     "io.delta" %% "delta-spark" % "3.2.1",
     "org.apache.spark" %% "spark-hadoop-cloud" % "3.5.3",
+    "io.unitycatalog" %% "unitycatalog-spark" % "0.2.1"
 )
 
 assembly / assemblyMergeStrategy := {

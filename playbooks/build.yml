@@ -18,7 +18,7 @@
       docker buildx build
       --platform linux/amd64
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t {{ registry }}/rusha-spark-environment-3.5.3-scala2.12-java17-python3.10.12-ubuntu:{{ git_tag.stdout }}
+      -t {{ registry }}/rusha-spark-environment-3.5.3-scala2.13-java17-python3.10.12-ubuntu:{{ git_tag.stdout }}
       . --push
     args:
       chdir: /tmp/rusha-spark-environment
