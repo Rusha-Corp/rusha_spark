@@ -19,6 +19,7 @@ WORKDIR /app
 COPY . /app
 RUN sbt assembly
 
+
 # ------------------------------
 # Stage 2: Runtime Spark Setup
 # ------------------------------
@@ -31,15 +32,47 @@ ARG SCALA_VERSION=2.13
 ENV SPARK_HOME=/opt/spark
 ENV PATH=${SPARK_HOME}/bin:${SPARK_HOME}/sbin:$PATH
 
-# Install dependencies
+# Install dependencies and Python 3.12
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     tar \
     bash \
-    python3 \
-    python3-pip \
     gnupg \
+    build-essential \
+    libssl-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    curl \
+    libncurses5-dev \
+    libncursesw5-dev \
+    xz-utils \
+    tk-dev \
+    libffi-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Python 3.12
+RUN set -eux; \
+    PYTHON_VERSION=3.12.0; \
+    PYTHON_TGZ_URL=https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz; \
+    \
+    # Download and compile Python
+    TMP_DIR=$(mktemp -d) && cd $TMP_DIR; \
+    wget -q $PYTHON_TGZ_URL -O python.tgz; \
+    tar -xf python.tgz; \
+    cd Python-$PYTHON_VERSION; \
+    ./configure --enable-optimizations; \
+    make -j$(nproc); \
+    make altinstall; \
+    \
+    # Clean up
+    rm -rf $TMP_DIR; \
+    ln -sf /usr/local/bin/python3.12 /usr/bin/python3; \
+    ln -sf /usr/local/bin/pip3.12 /usr/bin/pip3
+
+# Verify Python installation
+RUN python3 --version && pip3 --version
 
 # Download and verify Apache Spark
 RUN set -eux; \
@@ -67,9 +100,6 @@ COPY scripts/start_thrift_server_k8s.sh /start_thrift_server_k8s.sh
 
 # Make scripts executable
 RUN chmod +x /start_*.sh
-
-# Configure Python
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 # Copy Fat JAR dependencies from build stage
 COPY --from=build /app/target/lib/* ${SPARK_HOME}/jars/
