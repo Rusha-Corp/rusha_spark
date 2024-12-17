@@ -5,12 +5,12 @@
   - name: pull git repo
     git:
       repo: git@github.com:Rusha-Corp/rusha_spark_delta.git
-      dest: /tmp/rusha-spark-environment
+      dest: /tmp/rusha-spark-environment-deploy
       version: main
       force: yes
 
   - name: set tag
-    command: git -C /tmp/rusha-spark-environment rev-parse --short HEAD
+    command: git -C /tmp/rusha-spark-environment-deploy rev-parse --short HEAD
     register: git_tag
 
   - name: Build openalex Docker image
@@ -21,4 +21,4 @@
       -t {{ registry }}/rusha-spark-environment-3.5.0-scala2.12-java17-python3.10.12-ubuntu:{{ git_tag.stdout }}
       . --push
     args:
-      chdir: /tmp/rusha-spark-environment
+      chdir: /tmp/rusha-spark-environment-deploy
