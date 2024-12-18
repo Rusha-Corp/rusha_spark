@@ -13,7 +13,10 @@ libraryDependencies ++= Seq(
 )
 
 
-libraryDependencies += "org.apache.iceberg" % "iceberg-aws" % "1.7.1" % "runtime"
+libraryDependencies += "org.apache.iceberg" % "iceberg-aws" % "1.7.1" // For S3 support
+libraryDependencies += "org.apache.iceberg" % "iceberg-aws-bundle" % "1.7.1"
+libraryDependencies += "org.apache.iceberg" % "iceberg-spark" % "1.7.1"
+
 
 assembly / assemblyMergeStrategy := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
