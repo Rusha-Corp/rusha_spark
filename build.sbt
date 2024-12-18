@@ -9,10 +9,11 @@ libraryDependencies ++= Seq(
     "io.delta" %% "delta-spark" % "3.2.1",
     "org.apache.spark" %% "spark-hadoop-cloud" % "3.5.3",
     "io.unitycatalog" %% "unitycatalog-spark" % "0.2.1",
-    "org.apache.iceberg" %% "iceberg-spark-runtime-3.5" % "1.7.1",
-    "org.apache.iceberg" %% "iceberg-aws" % "1.7.1" % "runtime"
+    "org.apache.iceberg" %% "iceberg-spark-runtime-3.5" % "1.7.1"
 )
 
+
+libraryDependencies += "org.apache.iceberg" % "iceberg-aws" % "1.7.1" % "runtime"
 
 assembly / assemblyMergeStrategy := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
