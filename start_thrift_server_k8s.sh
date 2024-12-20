@@ -27,10 +27,6 @@ env_vars=(
     "SPARK_DRIVER_POD_NAME"
 )
 
-for var in "${env_vars[@]}"; do
-    echo "$var=${!var}"
-done
-
 export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx4g -J-Xmx1024m -J-Xms512m"
 
 # Ensure necessary directories for Spark exist
