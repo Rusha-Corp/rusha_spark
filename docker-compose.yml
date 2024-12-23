@@ -23,29 +23,29 @@ services:
       retries: 5
       start_period: 20s # Delay to ensure the database is fully ready
 
-  # beeswax-hive-server:
-  #   image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
-  #   networks:
-  #     - spark-container-network
-  #   volumes:
-  #     - /tmp:/tmp
-  #   environment:
-  #     - SERVICE_NAME=hiveserver2 
-  #     - DB_DRIVER=postgres    
-  #     - VERBOSE=true
-  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-  #     - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-  #     - HADOOP_CLIENT_OPTS=-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres -Djavax.jdo.option.ConnectionUserName=postgres -Djavax.jdo.option.ConnectionPassword=password
-  #   restart: unless-stopped
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "2"
-  #         memory: 8G
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
+  beeswax-hive-server:
+    image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
+    networks:
+      - spark-container-network
+    volumes:
+      - /tmp:/tmp
+    environment:
+      - SERVICE_NAME=hiveserver2 
+      - DB_DRIVER=postgres    
+      - VERBOSE=true
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - HADOOP_CLIENT_OPTS=-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres -Djavax.jdo.option.ConnectionUserName=postgres -Djavax.jdo.option.ConnectionPassword=password
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 8G
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   metastore:
     image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
@@ -78,7 +78,6 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "10000:10000"
       - "4041:4040"
     hostname: spark-thrift-server
     environment:
@@ -145,6 +144,11 @@ services:
       - ./conf:/usr/share/hue/desktop/conf
     networks:
       - spark-container-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 4G
 
 networks:
   spark-container-network:
