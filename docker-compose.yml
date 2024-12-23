@@ -1,122 +1,150 @@
 services:
-  spark-dev:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "4040:4040"
-    hostname: spark-dev
+  postgres:
+    image: postgres:13
     environment:
-      - SPARK_SQL_SERVER_PORT=10000
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - SPARK_WAREHOUSE_DIR=${WAREHOUSE}
-      - UNITY_URI=${UNITY_URI}
-      - UNITY_TOKEN=${UNITY_TOKEN}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
     volumes:
-      - /tmp:/tmp
-    depends_on:
-      - metastore
+      - $HOME/postgresql/dbs/openalex:/var/lib/postgresql/data
+    networks:
+      - spark-container-network
+    hostname: postgres
     restart: unless-stopped
-    entrypoint: sleep infinity
     deploy:
       resources:
         limits:
-          cpus: "2"
-          memory: 8G
-          
-  # postgres:
-  #   image: postgres:13
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: password
-  #     POSTGRES_DB: postgres
-  #   volumes:
-  #     - $HOME/postgresql/dbs/openalex:/var/lib/postgresql/data
+          cpus: "1"
+          memory: 4G
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s # Delay to ensure the database is fully ready
+
+  # beeswax-hive-server:
+  #   image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
   #   networks:
   #     - spark-container-network
-  #   hostname: postgres
-  #   restart: unless-stopped
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "1"
-  #         memory: 4G
-
-  # spark-thrift-server:
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "10000:10000"
-  #   hostname: spark-thrift-server
-  #   environment:
-  #     - SPARK_SQL_SERVER_PORT=10000
-  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-  #     - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-  #     - SPARK_WAREHOUSE_DIR=${WAREHOUSE}
-  #     - METASTORE_URIS=thrift://metastore:9023
-  #     - SPARK_LOG_DIR=/tmp/spark-events
-  #     - SPARK_DRIVER_HOST=spark-thrift-server
   #   volumes:
   #     - /tmp:/tmp
-  #   networks:
-  #     - spark-container-network
-  #   depends_on:
-  #     - metastore
+  #   environment:
+  #     - SERVICE_NAME=hiveserver2 
+  #     - DB_DRIVER=postgres    
+  #     - VERBOSE=true
+  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+  #     - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+  #     - HADOOP_CLIENT_OPTS=-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres -Djavax.jdo.option.ConnectionUserName=postgres -Djavax.jdo.option.ConnectionPassword=password
   #   restart: unless-stopped
-  #   entrypoint: /bin/bash -c /start_thrift_server_k2s.sh
   #   deploy:
   #     resources:
   #       limits:
   #         cpus: "2"
   #         memory: 8G
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
 
-  # spark-history-server:
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "12020:12020"
-  #   hostname: spark-history-server
-  #   volumes:
-  #     - /tmp:/tmp
-  #   networks:
-  #     - spark-container-network
-  #   # depends_on:
-  #   #   - metastore
-  #   restart: unless-stopped
-  #   entrypoint: /bin/bash -c /start_history_server.sh
-  #   environment:
-  #     - SPARK_LOG_DIR=/tmp/spark-events
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "1"
-  #         memory: 4G
+  metastore:
+    image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
+    ports:
+      - 9083:9083
+    networks:
+      - spark-container-network
+    volumes:
+      - /tmp:/tmp
+    environment:
+      - SERVICE_NAME=metastore
+      - DB_DRIVER=postgres    
+      - VERBOSE=true
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - HADOOP_CLIENT_OPTS=-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres -Djavax.jdo.option.ConnectionUserName=postgres -Djavax.jdo.option.ConnectionPassword=password
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 8G
+    depends_on:
+      postgres:
+        condition: service_healthy
 
-  # shuffle-service:
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "7337:7337"
-  #   hostname: shuffle-service
-  #   volumes:
-  #     - /tmp:/tmp
-  #   networks:
-  #     - spark-container-network
-  #   # depends_on:
-  #   #   - metastore
-  #   restart: unless-stopped
-  #   entrypoint: /bin/bash -c /start_shuffle_service.sh
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "1"
-  #         memory: 4G
+  spark-thrift-server:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "10000:10000"
+      - "4041:4040"
+    hostname: spark-thrift-server
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - SPARK_WAREHOUSE_DIR=${WAREHOUSE}
+      - METASTORE_URIS=${METASTORE_URIS}
+      - SPARK_LOG_DIR=/tmp/spark-events
+      - SPARK_DRIVER_HOST=spark-thrift-server
+    volumes:
+      - /tmp:/tmp
+    networks:
+      - spark-container-network
+    restart: always
+    entrypoint: ["/bin/bash", "-c", "/start_thrift_server.sh"]
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
+          memory: 32G
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s thrift://spark-thrift-server:10000 | grep -q Thrift"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+   
+        
+  spark-history-server:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "18080:18080"
+    hostname: spark-history-server
+    volumes:
+      - /tmp:/tmp
+    networks:
+      - spark-container-network
+    # depends_on:
+    #   spark-thrift-server:
+    #     condition: service_healthy  
+    restart: unless-stopped
+    entrypoint: /bin/bash -c /start_history_server.sh
+    environment:
+      - SPARK_LOG_DIR=/tmp/spark-events
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 4G
+
+  hue:
+    image: gethue/hue:latest
+    hostname: hue
+    container_name: hue
+    dns: 8.8.8.8
+    depends_on:
+      - spark-thrift-server
+    ports:
+    - "8888:8888"
+    volumes:
+      - ./conf:/usr/share/hue/desktop/conf
+    networks:
+      - spark-container-network
 
 networks:
   spark-container-network:

@@ -51,8 +51,9 @@ ${SPARK_HOME}/bin/spark-submit \
   --master ${SPARK_MASTER} \
   --conf spark.sql.warehouse.dir=${SPARK_WAREHOUSE_DIR} \
   --conf spark.hadoop.hive.metastore.uris=${METASTORE_URIS} \
+  --conf spark.sql.catalogImplementation=hive \
   --conf spark.sql.hive.thriftServer.singleSession=false \
-  --conf spark.sql.hive.thriftServer.enable.doAs=false \
+  --conf spark.sql.hive.thriftServer.enable.doAs=true \
   --conf spark.sql.server.port=${SPARK_SQL_SERVER_PORT} \
   --conf spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider \
   --conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem \

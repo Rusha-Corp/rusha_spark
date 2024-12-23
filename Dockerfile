@@ -50,6 +50,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xz-utils \
     tk-dev \
     libffi-dev \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python 3.12

@@ -22,6 +22,7 @@ target
 .devcontainer
 *.zip
 derby.log
+z-hue.ini
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
