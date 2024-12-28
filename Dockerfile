@@ -93,12 +93,7 @@ RUN set -eux; \
     rm -rf "$SPARK_TMP"
 
 # Add entrypoint scripts
-COPY scripts/start_thrift_server.sh /start_thrift_server.sh
-COPY scripts/start_history_server.sh /start_history_server.sh
-COPY scripts/start_spark_worker.sh /start_spark_worker.sh
-COPY scripts/start_spark_master.sh /start_spark_master.sh
-COPY scripts/start_thrift_server_k8s.sh /start_thrift_server_k8s.sh
-
+COPY scripts/*.sh /
 # Make scripts executable
 RUN chmod +x /start_*.sh
 

@@ -46,7 +46,7 @@ mkdir -p ${SPARK_LOG_DIR}
 export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1024m -J-Xms512m"
 
 # Start the Spark Thrift Server in standalone mode
-${SPARK_HOME}/bin/spark-submit \
+"${SPARK_HOME}/bin/spark-submit" \
   --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2 \
   --master ${SPARK_MASTER} \
   --conf spark.sql.warehouse.dir=${SPARK_WAREHOUSE_DIR} \
@@ -60,8 +60,13 @@ ${SPARK_HOME}/bin/spark-submit \
   --conf spark.hadoop.fs.s3a.access.key=${AWS_ACCESS_KEY_ID} \
   --conf spark.hadoop.fs.s3a.secret.key=${AWS_SECRET_ACCESS_KEY} \
   --conf spark.hadoop.fs.s3a.path.style.access=true \
-  --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension \
+  --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension,org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions \
   --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
+  --conf spark.sql.catalog.iceberg=org.apache.iceberg.spark.SparkCatalog \
+  --conf spark.sql.catalog.iceberg.type=hive \
+  --conf spark.sql.catalog.iceberg.uri=${METASTORE_URIS} \
+  --conf spark.sql.catalog.iceberg.warehouse=${SPARK_WAREHOUSE_DIR} \
+  --conf spark.sql.catalog.iceberg.io-impl=org.apache.iceberg.aws.s3.S3FileIO \
   --conf spark.eventLog.enabled=true \
   --conf spark.eventLog.dir=${SPARK_LOG_DIR} \
   --conf spark.driver.memory=${SPARK_DRIVER_MEMORY} \
