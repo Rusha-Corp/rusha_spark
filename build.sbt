@@ -1,4 +1,4 @@
-name := "spark-unity-catalog"
+name := "spark-iceberg-delta-unitycatalog"
 version := "1.0"
 scalaVersion := "2.12.19"  // Use a Scala version compatible with Spark
 javacOptions ++= Seq("-source", "17", "-target", "17")  // Java 17 compatibility
@@ -9,9 +9,9 @@ libraryDependencies ++= Seq(
   "io.delta" %% "delta-spark" % "3.2.1",
   "org.apache.spark" %% "spark-hadoop-cloud" % "3.5.3",
   "io.unitycatalog" %% "unitycatalog-spark" % "0.2.1",
-  "org.apache.iceberg" % "iceberg-aws" % "1.7.1", // For S3 support
   "org.apache.iceberg" %% "iceberg-spark-runtime-3.5" % "1.7.1",
-  "org.apache.iceberg" % "iceberg-aws" % "1.7.1" % "runtime"
+  "org.apache.iceberg" % "iceberg-aws" % "1.7.1" % "runtime",
+  "org.apache.iceberg" % "iceberg-aws-bundle" % "1.7.1"
 ).map(
   _.exclude("org.slf4j", "slf4j-api") // Exclude SLF4J API
   .exclude("org.slf4j", "slf4j-log4j12") // Exclude SLF4J Log4j binding
