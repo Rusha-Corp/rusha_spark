@@ -44,6 +44,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libbz2-dev \
     libreadline-dev \
     libsqlite3-dev \
+    libpq-dev \
     curl \
     libncurses5-dev \
     libncursesw5-dev \
@@ -99,6 +100,12 @@ RUN chmod +x /start_*.sh
 
 # Copy Fat JAR dependencies from build stage
 COPY --from=build /app/target/lib/* ${SPARK_HOME}/jars/
+
+# install poetry copy the poetry.lock and pyproject.toml export to requirements.txt
+RUN pip3 install poetry && poetry self add poetry-plugin-export
+COPY pyproject.toml poetry.lock ./
+RUN poetry export -f requirements.txt > requirements.txt
+RUN pip3 install -r requirements.txt
 
 # Set default command
 CMD ["bash"]

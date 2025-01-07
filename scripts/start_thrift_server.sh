@@ -62,11 +62,12 @@ export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1
   --conf spark.hadoop.fs.s3a.path.style.access=true \
   --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension,org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions \
   --conf spark.sql.catalog.spark_catalog=org.apache.iceberg.spark.SparkSessionCatalog \
-  --conf spark.sql.catalog.iceberg=org.apache.iceberg.spark.SparkCatalog \
-  --conf spark.sql.catalog.iceberg.type=hive \
-  --conf spark.sql.catalog.iceberg.uri=${METASTORE_URIS} \
-  --conf spark.sql.catalog.iceberg.warehouse=${SPARK_WAREHOUSE_DIR}/iceberg_catalog \
-  --conf spark.sql.catalog.iceberg.io-impl=org.apache.iceberg.aws.s3.S3FileIO \
+  --conf spark.sql.catalog.iceberg_catalog=org.apache.iceberg.spark.SparkCatalog \
+  --conf spark.sql.catalog.iceberg_catalog.type=hive \
+  --conf spark.sql.catalog.iceberg_catalog.uri=${METASTORE_URIS} \
+  --conf spark.sql.catalog.iceberg_catalog.warehouse=${SPARK_WAREHOUSE_DIR}/iceberg_catalog \
+  --conf spark.sql.catalog.iceberg_catalog.io-impl=org.apache.iceberg.aws.s3.S3FileIO \
+  # --conf spark.sql.defaultCatalog=iceberg_catalog \
   --conf spark.eventLog.enabled=true \
   --conf spark.eventLog.dir=${SPARK_LOG_DIR} \
   --conf spark.driver.memory=${SPARK_DRIVER_MEMORY} \

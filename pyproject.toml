@@ -7,8 +7,15 @@ readme = "README.md"
 packages = [{include = "spark_container"}]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-ansible = "^10.3.0"
+python = "^3.12"
+spacy = "3.7"
+mlflow = "^2.19.0"
+psycopg2 = "^2.9.10"
+boto3 = "^1.35.92"
+
+[tool.poetry.group.dev.dependencies]
+pip = "^24.3.1"
+ansible = "^11.1.0"
 
 [build-system]
 requires = ["poetry-core"]

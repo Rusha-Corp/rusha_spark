@@ -8,9 +8,9 @@ services:
     volumes:
       - $HOME/postgresql/dbs/openalex:/var/lib/postgresql/data
     networks:
-      - spark-container-network
+      - spark-container-network-dbt
     hostname: postgres
-    restart: unless-stopped
+    restart: always
     deploy:
       resources:
         limits:
@@ -23,13 +23,12 @@ services:
       retries: 5
       start_period: 20s # Delay to ensure the database is fully ready
 
-  
   metastore:
     image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
     ports:
       - 9083:9083
     networks:
-      - spark-container-network
+      - spark-container-network-dbt
     volumes:
       - /tmp:/tmp
     environment:
@@ -40,7 +39,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - HADOOP_CLIENT_OPTS=-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres -Djavax.jdo.option.ConnectionUserName=postgres -Djavax.jdo.option.ConnectionPassword=password
-    restart: unless-stopped
+    restart: always
     deploy:
       resources:
         limits:
@@ -69,7 +68,7 @@ services:
     volumes:
       - /tmp:/tmp
     networks:
-      - spark-container-network
+      - spark-container-network-dbt
     restart: always
     entrypoint: ["/bin/bash", "-c", "/start_thrift_server.sh"]
     deploy:
@@ -83,8 +82,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-   
-  
+
   spark-history-server:
     build: 
       context: .
@@ -95,11 +93,11 @@ services:
     volumes:
       - /tmp:/tmp
     networks:
-      - spark-container-network
+      - spark-container-network-dbt
     # depends_on:
     #   spark-thrift-server:
     #     condition: service_healthy  
-    restart: unless-stopped
+    restart: always
     entrypoint: /bin/bash -c /start_history_server.sh
     environment:
       - SPARK_LOG_DIR=/tmp/spark-events
@@ -121,7 +119,32 @@ services:
     volumes:
       - ./conf:/usr/share/hue/desktop/conf
     networks:
-      - spark-container-network
+      - spark-container-network-dbt
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 4G
+
+  ml:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_REGION=${AWS_DEFAULT_REGION}
+    ports:
+      - "5000:5000"
+    command: mlflow server --backend-store-uri postgresql://postgres:password@postgres:5432/postgres --default-artifact-root s3://owalake/models/artifacts --host 0.0.0.0 --port 5000
+    volumes:
+      - /tmp:/tmp
+      - ./mlflow:/mlflow
+    networks:
+      - spark-container-network-dbt
+    restart: always
     deploy:
       resources:
         limits:
@@ -129,5 +152,5 @@ services:
           memory: 4G
 
 networks:
-  spark-container-network:
-    driver: bridge
+  spark-container-network-dbt:
+    external: true
