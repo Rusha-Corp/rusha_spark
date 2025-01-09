@@ -6,6 +6,7 @@ set -e
 : "${METASTORE_URIS:?Environment variable METASTORE_URIS is required}"
 : "${AWS_ACCESS_KEY_ID:?Environment variable AWS_ACCESS_KEY_ID is required}"
 : "${AWS_SECRET_ACCESS_KEY:?Environment variable AWS_SECRET_ACCESS_KEY is required}"
+: "${AWS_SESSION_TOKEN:?Environment variable AWS_SESSION_TOKEN is required}"
 
 # Set default values for optional environment variables if not already set
 export SPARK_MASTER=${SPARK_MASTER:-local[*]}
@@ -54,11 +55,11 @@ export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1
   --conf spark.sql.catalogImplementation=hive \
   --conf spark.sql.hive.thriftServer.singleSession=false \
   --conf spark.sql.hive.thriftServer.enable.doAs=true \
-  --conf spark.sql.server.port=${SPARK_SQL_SERVER_PORT} \
-  --conf spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider \
+  --conf spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider \
   --conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem \
   --conf spark.hadoop.fs.s3a.access.key=${AWS_ACCESS_KEY_ID} \
   --conf spark.hadoop.fs.s3a.secret.key=${AWS_SECRET_ACCESS_KEY} \
+  --conf spark.hadoop.fs.s3a.session.token=${AWS_SESSION_TOKEN} \
   --conf spark.hadoop.fs.s3a.path.style.access=true \
   --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension,org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions \
   --conf spark.sql.catalog.spark_catalog=org.apache.iceberg.spark.SparkSessionCatalog \
@@ -66,8 +67,6 @@ export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1
   --conf spark.sql.catalog.iceberg_catalog.type=hive \
   --conf spark.sql.catalog.iceberg_catalog.uri=${METASTORE_URIS} \
   --conf spark.sql.catalog.iceberg_catalog.warehouse=${SPARK_WAREHOUSE_DIR}/iceberg_catalog \
-  --conf spark.sql.catalog.iceberg_catalog.io-impl=org.apache.iceberg.aws.s3.S3FileIO \
-  # --conf spark.sql.defaultCatalog=iceberg_catalog \
   --conf spark.eventLog.enabled=true \
   --conf spark.eventLog.dir=${SPARK_LOG_DIR} \
   --conf spark.driver.memory=${SPARK_DRIVER_MEMORY} \

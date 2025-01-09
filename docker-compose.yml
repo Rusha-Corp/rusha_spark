@@ -60,11 +60,14 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - AWS_REGION=${AWS_DEFAULT_REGION}
       - SPARK_WAREHOUSE_DIR=${WAREHOUSE}
       - METASTORE_URIS=${METASTORE_URIS}
       - SPARK_LOG_DIR=/tmp/spark-events
       - SPARK_DRIVER_HOST=spark-thrift-server
+      - SPARK_EXECUTOR_CORES=8
+      - SPARK_EXECUTOR_MEMORY=64G
     volumes:
       - /tmp:/tmp
     networks:
@@ -114,13 +117,14 @@ services:
     dns: 8.8.8.8
     depends_on:
       - spark-thrift-server
+      - postgres
     ports:
     - "8888:8888"
     volumes:
       - ./conf:/usr/share/hue/desktop/conf
     networks:
       - spark-container-network-dbt
-    restart: always
+    restart: unless-stopped
     deploy:
       resources:
         limits:
@@ -138,7 +142,7 @@ services:
       - AWS_REGION=${AWS_DEFAULT_REGION}
     ports:
       - "5000:5000"
-    command: mlflow server --backend-store-uri postgresql://postgres:password@postgres:5432/postgres --default-artifact-root s3://owalake/models/artifacts --host 0.0.0.0 --port 5000
+    command: mlflow server --backend-store-uri postgresql://postgres:password@postgres:5432/postgres --default-artifact-root ${ARTIFACTS_ROOT} --host 0.0.0.0 --port 5000
     volumes:
       - /tmp:/tmp
       - ./mlflow:/mlflow
@@ -150,6 +154,26 @@ services:
         limits:
           cpus: "1"
           memory: 4G
+
+  iceberg-rest:
+    image: apache/iceberg-rest-fixture
+    container_name: iceberg-rest
+    networks:
+      - spark-container-network-dbt
+    ports:
+      - 8181:8181
+    restart: always
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_DEFAULT_REGION}
+      - CATALOG_WAREHOUSE=${WAREHOUSE}/iceberg_catalog
+      - CATALOG_IO__IMPL=org.apache.iceberg.aws.s3.S3FileIO
+      - CATALOG_S3_ENDPOINT=s3.${AWS_DEFAULT_REGION}.amazonaws.com
+      - CATALOG_JDBC__IMPL=org.postgresql.Driver
+      - CATALOG_JDBC__URL=jdbc:postgresql://postgres:5432/postgres
+      - CATALOG_JDBC__USER=postgres
+      - CATALOG_JDBC__PASSWORD=password
 
 networks:
   spark-container-network-dbt:
