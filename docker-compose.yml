@@ -38,6 +38,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - HADOOP_CLIENT_OPTS=-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres -Djavax.jdo.option.ConnectionUserName=postgres -Djavax.jdo.option.ConnectionPassword=password
     restart: always
     deploy:
@@ -66,8 +67,10 @@ services:
       - METASTORE_URIS=${METASTORE_URIS}
       - SPARK_LOG_DIR=/tmp/spark-events
       - SPARK_DRIVER_HOST=spark-thrift-server
-      - SPARK_EXECUTOR_CORES=8
+      - SPARK_EXECUTOR_CORES=16
       - SPARK_EXECUTOR_MEMORY=64G
+      - SPARK_DRIVER_MEMORY=64G
+      - SPARK_DRIVER_CORES=16
     volumes:
       - /tmp:/tmp
     networks:
@@ -77,8 +80,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "8"
-          memory: 32G
+          cpus: "16"
+          memory: 72G
     healthcheck:
       test: ["CMD-SHELL", "curl -s thrift://spark-thrift-server:10000 | grep -q Thrift"]
       interval: 10s
@@ -139,6 +142,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - AWS_REGION=${AWS_DEFAULT_REGION}
     ports:
       - "5000:5000"

@@ -56,7 +56,7 @@ export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1
   --conf spark.sql.hive.thriftServer.singleSession=false \
   --conf spark.sql.hive.thriftServer.enable.doAs=true \
   --conf spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider \
-  --conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem \
+  --conf spark.hadoop.fs.s3a.impl=org.apache.iceberg.aws.s3.S3FileIO \
   --conf spark.hadoop.fs.s3a.access.key=${AWS_ACCESS_KEY_ID} \
   --conf spark.hadoop.fs.s3a.secret.key=${AWS_SECRET_ACCESS_KEY} \
   --conf spark.hadoop.fs.s3a.session.token=${AWS_SESSION_TOKEN} \
