@@ -23,57 +23,6 @@ services:
       retries: 5
       start_period: 20s # Delay to ensure the database is fully ready
 
-  metastore:
-    image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
-    ports:
-      - 9083:9083
-    networks:
-      - spark-container-network-dbt
-    volumes:
-      - /tmp:/tmp
-    environment:
-      - SERVICE_NAME=metastore
-      - DB_DRIVER=postgres    
-      - VERBOSE=true
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
-      - HADOOP_CLIENT_OPTS=-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres -Djavax.jdo.option.ConnectionUserName=postgres -Djavax.jdo.option.ConnectionPassword=password
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 8G
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  hive-server:
-    image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
-    ports:
-      - 10000:10000
-    networks:
-      - spark-container-network-dbt
-    volumes:
-      - /tmp:/tmp
-    environment:
-      - SERVICE_NAME=hiveserver2
-      - DB_DRIVER=postgres    
-      - VERBOSE=true
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
-      - HADOOP_CLIENT_OPTS=-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres -Djavax.jdo.option.ConnectionUserName=postgres -Djavax.jdo.option.ConnectionPassword=password
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 8G
-
   spark-thrift-server:
     build: 
       context: .
