@@ -50,6 +50,30 @@ services:
       postgres:
         condition: service_healthy
 
+  hive-server:
+    image: europe-west1-docker.pkg.dev/owa-gemini/docker-registry/hive_metastore:v11
+    ports:
+      - 10000:10000
+    networks:
+      - spark-container-network-dbt
+    volumes:
+      - /tmp:/tmp
+    environment:
+      - SERVICE_NAME=hiveserver2
+      - DB_DRIVER=postgres    
+      - VERBOSE=true
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - HADOOP_CLIENT_OPTS=-Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres -Djavax.jdo.option.ConnectionUserName=postgres -Djavax.jdo.option.ConnectionPassword=password
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 8G
+
   spark-thrift-server:
     build: 
       context: .
@@ -178,6 +202,23 @@ services:
       - CATALOG_JDBC__URL=jdbc:postgresql://postgres:5432/postgres
       - CATALOG_JDBC__USER=postgres
       - CATALOG_JDBC__PASSWORD=password
+
+  ingress:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./certs:/etc/letsencrypt
+    networks:
+      - spark-container-network-dbt
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 4G
 
 networks:
   spark-container-network-dbt:

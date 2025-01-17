@@ -14,6 +14,4 @@ export AWS_ACCESS_KEY_ID=$(echo $output | jq -r '.Credentials.AccessKeyId')
 export AWS_SECRET_ACCESS_KEY=$(echo $output | jq -r '.Credentials.SecretAccessKey')
 export AWS_SESSION_TOKEN=$(echo $output | jq -r '.Credentials.SessionToken')
 
-docker compose up -d --remove-orphans # --build
-
-
+docker compose up -d --remove-orphans --force-recreate --build 
