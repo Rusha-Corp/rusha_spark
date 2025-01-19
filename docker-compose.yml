@@ -29,6 +29,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4041:4040"
+      - "10005:10000"
     hostname: spark-thrift-server
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -45,7 +46,7 @@ services:
       - SPARK_DRIVER_MEMORY=64G
       - SPARK_DRIVER_CORES=16
     volumes:
-      - /tmp:/tmp
+      - ./tmp:/tmp
     networks:
       - spark-container-network-dbt
     restart: always
@@ -56,7 +57,7 @@ services:
           cpus: "16"
           memory: 72G
     healthcheck:
-      test: ["CMD-SHELL", "curl -s thrift://spark-thrift-server:10000 | grep -q Thrift"]
+      test: ["CMD-SHELL", "nc -z localhost 10000"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -70,7 +71,7 @@ services:
       - "18080:18080"
     hostname: spark-history-server
     volumes:
-      - /tmp:/tmp
+      - ./tmp:/tmp
     networks:
       - spark-container-network-dbt
     # depends_on:
@@ -98,6 +99,7 @@ services:
     - "8888:8888"
     volumes:
       - ./conf:/usr/share/hue/desktop/conf
+      - ./tmp:/tmp
     networks:
       - spark-container-network-dbt
     restart: unless-stopped
@@ -121,7 +123,7 @@ services:
       - "5000:5000"
     command: mlflow server --backend-store-uri postgresql://postgres:password@postgres:5432/postgres --default-artifact-root ${ARTIFACTS_ROOT} --host 0.0.0.0 --port 5000
     volumes:
-      - /tmp:/tmp
+      - ./tmp:/tmp
       - ./mlflow:/mlflow
     networks:
       - spark-container-network-dbt

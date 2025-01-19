@@ -23,6 +23,7 @@ target
 *.zip
 derby.log
 z-hue.ini
+tmp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

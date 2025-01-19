@@ -1,2 +1,5 @@
 .venv
 target
+.venv
+certs
+tmp
