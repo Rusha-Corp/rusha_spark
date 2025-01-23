@@ -76,23 +76,23 @@ RUN set -eux; \
 # Verify Python installation
 RUN python3 --version && pip3 --version
 
-# Download and verify Apache Spark
-RUN set -eux; \
-    SPARK_TGZ_URL=https://downloads.apache.org/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz; \
-    SPARK_TGZ_ASC_URL=${SPARK_TGZ_URL}.asc; \
-    \
-    # Create temporary working directory
-    SPARK_TMP="$(mktemp -d)" && cd "$SPARK_TMP"; \
-    \
-    # Download Spark and signature
-    wget -q -O spark.tgz "$SPARK_TGZ_URL"; \
-    wget -q -O spark.tgz.asc "$SPARK_TGZ_ASC_URL"; \
-    \
-    # Extract Spark and clean up
-    tar -xzf spark.tgz -C /opt; \
-    mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} ${SPARK_HOME}; \
-    rm -rf "$SPARK_TMP"
+# Set Spark download URL
+RUN SPARK_TGZ_URL=https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
 
+# Create temporary working directory
+RUN SPARK_TMP="$(mktemp -d)" && cd "$SPARK_TMP"
+
+# Download Spark
+RUN wget -q -O spark.tgz "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz"
+
+# Extract Spark to /opt
+RUN tar -xzf spark.tgz -C /opt
+
+# Move to final location
+RUN mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} ${SPARK_HOME}
+
+# Clean up temp directory
+RUN rm -rf "$SPARK_TMP"
 # Add entrypoint scripts
 COPY scripts/*.sh /
 # Make scripts executable

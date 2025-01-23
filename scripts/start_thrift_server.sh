@@ -3,10 +3,10 @@ set -e
 
 # Check if required environment variables are set
 : "${SPARK_WAREHOUSE_DIR:?Environment variable SPARK_WAREHOUSE_DIR is required}"
-: "${METASTORE_URIS:?Environment variable METASTORE_URIS is required}"
+: "${METASTORE_URIS:?Environment variable METASTORE_URIS is required}" 
 : "${AWS_ACCESS_KEY_ID:?Environment variable AWS_ACCESS_KEY_ID is required}"
 : "${AWS_SECRET_ACCESS_KEY:?Environment variable AWS_SECRET_ACCESS_KEY is required}"
-: "${AWS_SESSION_TOKEN:?Environment variable AWS_SESSION_TOKEN is required}"
+: "${HADOOP_AWS_CREDENTIAL_PROVIDER_CLASS:?Environment variable HADOOP_AWS_CREDENTIAL_PROVIDER_CLASS is required}"
 
 # Set default values for optional environment variables if not already set
 export SPARK_MASTER=${SPARK_MASTER:-local[*]}
@@ -19,8 +19,9 @@ export SPARK_LOG_DIR=${SPARK_LOG_DIR:-/var/log/spark}
 export SPARK_DRIVER_HOST=${SPARK_DRIVER_HOST:-localhost}
 export SPARK_DRIVER_PORT=${SPARK_DRIVER_PORT:-7077}
 export SPARK_BLOCKMANAGER_PORT=${SPARK_BLOCKMANAGER_PORT:-7078}
-export SPARK_DRIVER_MAX_RESULT_SIZE=${SPARK_DRIVER_MAX_RESULT_SIZE:-4g}
-export SPARK_EXECUTOR_MEMORY_OVERHEAD=${SPARK_EXECUTOR_MEMORY_OVERHEAD:-8g}
+export SPARK_DRIVER_MAX_RESULT_SIZE=${SPARK_DRIVER_MAX_RESULT_SIZE:-50g}
+export SPARK_EXECUTOR_MEMORY_OVERHEAD=${SPARK_EXECUTOR_MEMORY_OVERHEAD:-16g}
+
 
 # Log environment variables (optional, for debugging purposes)
 echo "Starting Spark Thrift Server with the following environment variables:"
@@ -40,6 +41,7 @@ echo "SPARK_DRIVER_PORT=${SPARK_DRIVER_PORT}"
 echo "SPARK_BLOCKMANAGER_PORT=${SPARK_BLOCKMANAGER_PORT}"
 echo "SPARK_DRIVER_MAX_RESULT_SIZE=${SPARK_DRIVER_MAX_RESULT_SIZE}"
 echo "SPARK_EXECUTOR_MEMORY_OVERHEAD=${SPARK_EXECUTOR_MEMORY_OVERHEAD}"
+echo "HADOOP_AWS_CREDENTIAL_PROVIDER_CLASS=${HADOOP_AWS_CREDENTIAL_PROVIDER_CLASS}"
 
 # Ensure the necessary directories for Spark exist
 mkdir -p ${SPARK_LOG_DIR}
@@ -54,8 +56,8 @@ export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1
   --conf spark.hadoop.hive.metastore.uris=${METASTORE_URIS} \
   --conf spark.sql.catalogImplementation=hive \
   --conf spark.sql.hive.thriftServer.singleSession=false \
-  --conf spark.sql.hive.thriftServer.enable.doAs=true \
-  --conf spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider \
+  --conf spark.sql.hive.thriftServer.enable.doAs=false \
+  --conf spark.hadoop.fs.s3a.aws.credentials.provider=${HADOOP_AWS_CREDENTIAL_PROVIDER_CLASS} \
   --conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem \
   --conf spark.hadoop.fs.s3a.access.key=${AWS_ACCESS_KEY_ID} \
   --conf spark.hadoop.fs.s3a.secret.key=${AWS_SECRET_ACCESS_KEY} \
@@ -78,6 +80,5 @@ export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1
   --conf spark.driver.host=${SPARK_DRIVER_HOST} \
   --conf spark.driver.port=${SPARK_DRIVER_PORT} \
   --conf spark.blockManager.port=${SPARK_BLOCKMANAGER_PORT} \
-  --conf spark.rpc.askTimeout=600s \
-  --conf spark.network.timeout=800s \
-  --conf spark.sql.thriftServer.incrementalCollect=true
+  --conf spark.sql.thriftServer.incrementalCollect=true \
+  --conf spark.network.timeout=300s

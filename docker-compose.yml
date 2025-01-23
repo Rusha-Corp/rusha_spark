@@ -1,35 +1,8 @@
 services:
-  postgres:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: postgres
-    volumes:
-      - $HOME/postgresql/dbs/openalex:/var/lib/postgresql/data
-    networks:
-      - spark-container-network-dbt
-    hostname: postgres
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 4G
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s # Delay to ensure the database is fully ready
-
   spark-thrift-server:
     build: 
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "4041:4040"
-      - "10005:10000"
     hostname: spark-thrift-server
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -41,21 +14,22 @@ services:
       - METASTORE_URIS=${METASTORE_URIS}
       - SPARK_LOG_DIR=/tmp/spark-events
       - SPARK_DRIVER_HOST=spark-thrift-server
-      - SPARK_EXECUTOR_CORES=16
-      - SPARK_EXECUTOR_MEMORY=64G
-      - SPARK_DRIVER_MEMORY=64G
-      - SPARK_DRIVER_CORES=16
+      - SPARK_EXECUTOR_CORES=8
+      - SPARK_EXECUTOR_MEMORY=32G
+      - SPARK_DRIVER_MEMORY=32G
+      - SPARK_DRIVER_CORES=8
+      - HADOOP_AWS_CREDENTIAL_PROVIDER_CLASS=org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider
     volumes:
       - ./tmp:/tmp
     networks:
-      - spark-container-network-dbt
+      - spark-container-network
     restart: always
     entrypoint: ["/bin/bash", "-c", "/start_thrift_server.sh"]
     deploy:
       resources:
         limits:
-          cpus: "16"
-          memory: 72G
+          cpus: "8"
+          memory: 48G
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 10000"]
       interval: 10s
@@ -63,45 +37,16 @@ services:
       retries: 5
       start_period: 30s
 
-  spark-history-server:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "18080:18080"
-    hostname: spark-history-server
-    volumes:
-      - ./tmp:/tmp
-    networks:
-      - spark-container-network-dbt
-    # depends_on:
-    #   spark-thrift-server:
-    #     condition: service_healthy  
-    restart: always
-    entrypoint: /bin/bash -c /start_history_server.sh
-    environment:
-      - SPARK_LOG_DIR=/tmp/spark-events
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 4G
-
   hue:
     image: gethue/hue:latest
     hostname: hue
     container_name: hue
-    dns: 8.8.8.8
     depends_on:
       - spark-thrift-server
-      - postgres
-    ports:
-    - "8888:8888"
     volumes:
       - ./conf:/usr/share/hue/desktop/conf
-      - ./tmp:/tmp
     networks:
-      - spark-container-network-dbt
+      - spark-container-network
     restart: unless-stopped
     deploy:
       resources:
@@ -119,14 +64,12 @@ services:
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - AWS_REGION=${AWS_DEFAULT_REGION}
-    ports:
-      - "5000:5000"
     command: mlflow server --backend-store-uri postgresql://postgres:password@postgres:5432/postgres --default-artifact-root ${ARTIFACTS_ROOT} --host 0.0.0.0 --port 5000
     volumes:
       - ./tmp:/tmp
       - ./mlflow:/mlflow
     networks:
-      - spark-container-network-dbt
+      - spark-container-network
     restart: always
     deploy:
       resources:
@@ -138,9 +81,7 @@ services:
     image: apache/iceberg-rest-fixture
     container_name: iceberg-rest
     networks:
-      - spark-container-network-dbt
-    ports:
-      - 8181:8181
+      - spark-container-network
     restart: always
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -153,6 +94,11 @@ services:
       - CATALOG_JDBC__URL=jdbc:postgresql://postgres:5432/postgres
       - CATALOG_JDBC__USER=postgres
       - CATALOG_JDBC__PASSWORD=password
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 4G
 
   ingress:
     image: nginx:latest
@@ -163,7 +109,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./certs:/etc/letsencrypt
     networks:
-      - spark-container-network-dbt
+      - spark-container-network
     restart: always
     deploy:
       resources:
@@ -172,5 +118,5 @@ services:
           memory: 4G
 
 networks:
-  spark-container-network-dbt:
+  spark-container-network:
     external: true
