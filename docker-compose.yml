@@ -64,7 +64,7 @@ services:
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - AWS_REGION=${AWS_DEFAULT_REGION}
-    command: mlflow server --backend-store-uri postgresql://postgres:password@postgres:5432/postgres --default-artifact-root ${ARTIFACTS_ROOT} --host 0.0.0.0 --port 5000
+    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/mlflow --default-artifact-root ${ARTIFACTS_ROOT} --host 0.0.0.0 --port 5000
     volumes:
       - ./tmp:/tmp
       - ./mlflow:/mlflow
@@ -99,6 +99,17 @@ services:
         limits:
           cpus: "1"
           memory: 4G
+
+  # pgAdmin:
+  #   image: dpage/pgadmin4
+  #   ports:
+  #     - 5050:80
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+  #     - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+  #   networks:
+  #     - spark-container-network
+  #   restart: always
 
   ingress:
     image: nginx:latest
