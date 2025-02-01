@@ -64,7 +64,9 @@ services:
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - AWS_REGION=${AWS_DEFAULT_REGION}
-    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/mlflow --default-artifact-root ${ARTIFACTS_ROOT} --host 0.0.0.0 --port 5000
+      - MLFLOW_TRACKING_USERNAME=${MLFLOW_TRACKING_USERNAME}
+      - MLFLOW_TRACKING_PASSWORD=${MLFLOW_TRACKING_PASSWORD}
+    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/mlflow --default-artifact-root ${ARTIFACTS_ROOT} --host 0.0.0.0 --port 5000 #--app-name basic-auth
     volumes:
       - ./tmp:/tmp
       - ./mlflow:/mlflow
@@ -100,17 +102,6 @@ services:
           cpus: "1"
           memory: 4G
 
-  # pgAdmin:
-  #   image: dpage/pgadmin4
-  #   ports:
-  #     - 5050:80
-  #   environment:
-  #     - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-  #     - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
-  #   networks:
-  #     - spark-container-network
-  #   restart: always
-
   ingress:
     image: nginx:latest
     ports:
@@ -122,11 +113,18 @@ services:
     networks:
       - spark-container-network
     restart: always
+    depends_on:
+      - spark-thrift-server
+      - hue
+      - ml
+      - iceberg-rest
     deploy:
       resources:
         limits:
           cpus: "1"
           memory: 4G
+
+  
 
 networks:
   spark-container-network:
