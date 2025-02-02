@@ -16,7 +16,7 @@ RUN apt-get install sbt -y
 WORKDIR /app
 
 # Copy project files and build the Fat JAR
-COPY . /app
+COPY --link . . 
 RUN sbt assembly
 
 
