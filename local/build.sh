@@ -7,10 +7,8 @@ poetry run ansible-playbook playbooks/build.yml \
     --extra-vars "project_dir=$(pwd)" \
     -i hosts.ini -vv;
 
-aws sts assume-role \
-  --role-arn $AWS_ROLE_ARN \
-  --role-session-name spark-thrift-server \
-  --duration-seconds 900 \
-
-
-# Install SBT
+docker buildx build \
+      --platform linux/amd64 \
+      --build-arg BUILDKIT_INLINE_CACHE=1 \
+      -t europe-west1-docker.pkg.dev/owa-gemini/docker-registry/rusha-spark-environment-3.5.3-scala2.12-java17-python3.12.0:3a42ada \
+      . --push
