@@ -32,6 +32,10 @@ ARG SCALA_VERSION=2.12
 ENV SPARK_HOME=/opt/spark
 ENV PATH=${SPARK_HOME}/bin:${SPARK_HOME}/sbin:$PATH
 
+
+RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https
+RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add
+
 # Install dependencies and Python 3.12
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
@@ -52,6 +56,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tk-dev \
     libffi-dev \
     procps \
+    netcat \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python 3.12
