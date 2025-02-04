@@ -36,6 +36,9 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    profiles:
+      - common
+      - spark-node
 
   hue:
     image: gethue/hue:latest
@@ -53,6 +56,8 @@ services:
         limits:
           cpus: "1"
           memory: 4G
+    profiles:
+      - common
 
   ml:
     build:
@@ -78,6 +83,8 @@ services:
         limits:
           cpus: "1"
           memory: 4G
+    profiles:
+      - common
 
   iceberg-rest:
     image: apache/iceberg-rest-fixture
@@ -101,6 +108,8 @@ services:
         limits:
           cpus: "1"
           memory: 4G
+    profiles:
+      - common
 
   ingress:
     image: nginx:latest
@@ -123,8 +132,8 @@ services:
         limits:
           cpus: "1"
           memory: 4G
-
-  
+    profiles:
+      - common
 
 networks:
   spark-container-network:
