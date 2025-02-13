@@ -82,4 +82,4 @@ export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1
   --conf spark.driver.port=${SPARK_DRIVER_PORT} \
   --conf spark.blockManager.port=${SPARK_BLOCKMANAGER_PORT} \
   --conf spark.sql.thriftServer.incrementalCollect=true \
-  --conf spark.network.timeout=300s
+  --conf spark.network.timeout=900s

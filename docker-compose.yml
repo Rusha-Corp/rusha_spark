@@ -54,8 +54,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 4G
+          cpus: "4"
+          memory: 16G
     profiles:
       - common
 
@@ -127,8 +127,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 4G
+          cpus: "4"
+          memory: 16G
     profiles:
       - common
       - spark-node
