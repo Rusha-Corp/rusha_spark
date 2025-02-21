@@ -34,7 +34,7 @@ metastore_db
 spark-warehouse
 test.*
 nginx.conf
-
+es-data/
 *env*
 
 

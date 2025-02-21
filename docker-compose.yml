@@ -4,6 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     hostname: spark-thrift-server
+    ports:
+      - "10000:10000"
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -132,6 +134,27 @@ services:
     profiles:
       - common
       - spark-node
+
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.2
+    container_name: es01
+    environment:
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+    networks:
+      - spark-container-network
+    env_file:
+      - .env
+    volumes:
+      - ./es-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    profiles:
+      - prod
+    deploy:
+      resources:
+        limits:
+          memory: "48GB"
 
 networks:
   spark-container-network:
