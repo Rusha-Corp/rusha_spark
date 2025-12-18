@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rusha-spark-3.5.3-base"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Emmanuel <kipronofb@outlook.com>"]
 readme = "README.md"
