@@ -1,24 +1,33 @@
 - name: Build Rusha Spark Docker image
   hosts: localhost
-  # remote_user: dev
+  vars:
+    registry: "{{ lookup('env', 'DOCKER_REGISTRY') | default('', true) }}"
+    repo_name: "{{ lookup('env', 'DOCKER_REPO') | default('rusha-spark-3.5.3-base', true) }}"
   tasks:
-  - name: pull git repo
-    git:
-      repo: git@github.com:Rusha-Corp/rusha_spark_delta.git
-      dest: /tmp/rusha-spark-environment
-      version: main
-      force: yes
-
-  - name: set tag
-    command: git -C /tmp/rusha-spark-environment rev-parse --short HEAD
+  - name: Get local git tag
+    command: git rev-parse --short HEAD
     register: git_tag
 
-  - name: Build openalex Docker image
+  - name: Build and Push (if registry set)
     command: >
       docker buildx build
       --platform linux/amd64
       --build-arg BUILDKIT_INLINE_CACHE=1
-      -t {{ registry }}/rusha-spark-environment-3.5.3-scala2.12-java17-python3.12.0:{{ git_tag.stdout }}
+      -t {{ registry }}/{{ repo_name }}:{{ git_tag.stdout }}
+      -t {{ registry }}/{{ repo_name }}:latest
       . --push
     args:
-      chdir: /tmp/rusha-spark-environment
+      chdir: "{{ playbook_dir }}/.."
+    when: registry != ""
+
+  - name: Build Locally (if registry not set)
+    command: >
+      docker buildx build
+      --platform linux/amd64
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t {{ repo_name }}:{{ git_tag.stdout }}
+      -t {{ repo_name }}:latest
+      .
+    args:
+      chdir: "{{ playbook_dir }}/.."
+    when: registry == ""

@@ -1,132 +1,113 @@
-# Spark Thrift Server Startup Script
+# Rusha Spark 3.5.3 Base
 
-This script starts the Spark Thrift Server on Kubernetes with various configurations and environment variables.
+This repository contains the infrastructure and code for the **Rusha Spark 3.5.3 Base**, a unified Spark environment designed for production SQL interfaces, machine learning experimentation, and interactive development.
 
-## Environment Variables
+## 1. Project Overview
 
-The script uses the following environment variables:
+The core of this project is a **Base Spark Image** (`rusha-spark-3.5.3-base`) that serves as the foundation for multiple Spark-based services. This repository is specifically focused on supporting various Spark services like the **Thrift Server**.
 
-- `SPARK_MASTER`: URL of the Spark master.
-- `SPARK_SQL_SERVER_PORT`: Port for the Spark SQL server (default: 10000).
-- `SPARK_DRIVER_MEMORY`: Memory for the Spark driver (default: 32g).
-- `SPARK_EXECUTOR_MEMORY`: Memory for Spark executors (default: 64g).
-- `SPARK_EXECUTOR_CORES`: Cores for Spark executors (default: 8).
-- `SPARK_WAREHOUSE_DIR`: Directory for Spark warehouse.
-- `METASTORE_URIS`: URIs for the Hive metastore.
-- `AWS_ACCESS_KEY_ID`: AWS access key ID.
-- `AWS_SECRET_ACCESS_KEY`: AWS secret access key.
-- `SPARK_HOME`: Path to the Spark home directory.
-- `SPARK_LOG_DIR`: Directory for Spark logs (default: /tmp/spark-events).
-- `SPARK_DRIVER_MAX_RESULT_SIZE`: Max result size for the Spark driver (default: 128g).
-- `SPARK_EXECUTOR_MEMORY_OVERHEAD`: Memory overhead for Spark executors (default: 8g).
-- `SPARK_DRIVER_HOST`: Host for the Spark driver.
-- `SPARK_DRIVER_PORT`: Port for the Spark driver (default: 7077).
-- `SPARK_UI_PORT`: Port for the Spark UI (default: 4040).
-- `SPARK_DRIVER_BLOCK_MANAGER_PORT`: Port for the Spark driver block manager (default: 7078).
-- `IMAGE`: Docker image for the Spark container.
-- `NAMESPACE`: Kubernetes namespace.
-- `SPARK_DRIVER_SERVICE_ACCOUNT`: Service account for the Spark driver.
-- `SPARK_DRIVER_POD_NAME`: Pod name for the Spark driver.
+It includes native support for:
+- **Nessie**: Git-like versioning for Data Lakes.
+- **Apache Iceberg**: High-performance table format.
+- **Delta Lake**: Reliable data lakes with ACID transactions.
+- **Unity Catalog**: Unified governance for data and AI.
+- **Hive**: Metadata management and SQL interface.
+- **AWS Integration**: Full S3 and AWS SDK support.
 
-## Script Steps
+### Architecture Visualization
 
-1. **Log Environment Variables**: Logs the environment variables for debugging.
-2. **Set Hadoop Client Options**: Configures Hadoop client options for garbage collection and memory.
-3. **Ensure Necessary Directories Exist**: Creates directories for Spark logs if they don't exist.
-4. **Check Required Environment Variables**: Ensures all required environment variables are set and assigns default values if needed.
-5. **Start Spark Thrift Server**: Uses `spark-submit` to start the Spark Thrift Server with various configurations.
+```mermaid
+graph TD
+    subgraph Repo [GitHub Repository]
+        Code[Source Code / Scala / Python]
+        Docs[Consolidated Documentation]
+        Release[GitHub Releases / Tags]
+    end
 
-## Spark Submit Configuration
+    subgraph Build_Process [Build & Registry]
+        Local[Local Workspace] -->|docker build| BaseImage[Base Spark Image]
+        BaseImage -->|push| Registry[Container Registry]
+        Release -->|Trigger| Local
+    end
 
-The `spark-submit` command is configured with:
-
-- `--class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2`: Main class for the Spark Thrift Server.
-- `--master "k8s://https://${SPARK_MASTER}"`: Master URL for Kubernetes.
-- `--deploy-mode client`: Deploy mode.
-- Various `--conf` options to configure Spark settings, including:
-    - Spark SQL warehouse directory.
-    - Hive metastore URIs.
-    - AWS credentials for S3 access.
-    - Spark event log settings.
-    - Memory and core settings for the driver and executors.
-    - Kubernetes-specific configurations such as container image, namespace, and service account.
-    - Dynamic allocation settings.
-    - Speculation settings.
-    - Network and timeout settings.
-
-## Usage
-
-Ensure all required environment variables are set, then execute the script:
-
-```bash
-./start_thrift_server_k8s.sh
+    subgraph Runtime [Services]
+        Registry -->|Pull| Thrift[Spark Thrift Server]
+        Registry -->|Pull| MLflow[MLflow Server]
+        Registry -->|Pull| DevNode[Spark Dev Node]
+    end
 ```
 
-## Additional Services
+## 2. Getting Started
 
-### Hue
+### Prerequisites
+- Docker & Docker Buildx
+- Java 17 & SBT (for building Scala components)
+- Python 3.12 & Poetry
 
-Hue is a web-based interface for interacting with Hadoop and Spark.
+### Environment Variables
+The following variables are required for various services. It is recommended to manage them via a `.env` file (ignored by git).
 
-- **Image**: `gethue/hue:latest`
-- **Hostname**: `hue`
-- **Depends on**: `spark-thrift-server`
-- **Volumes**: `./conf:/usr/share/hue/desktop/conf`
-- **Networks**: `spark-container-network`
-- **Restart Policy**: `unless-stopped`
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SPARK_MASTER` | URL of the Spark master | - |
+| `SPARK_WAREHOUSE_DIR` | Directory for Spark warehouse | - |
+| `METASTORE_URIS` | URIs for the Hive metastore | - |
+| `DOCKER_REGISTRY` | (Optional) Destination container registry | - |
+| `DOCKER_REPO` | (Optional) Destination repository name | `rusha-spark-3.5.3-base` |
+
+## 3. Build & Release Process
+
+### Local Build
+To build the base image locally:
+```bash
+./local/build.sh
+```
+By default, this will build and tag the image locally. To push to a remote registry, set the `DOCKER_REGISTRY` environment variable in your `.env` file.
+
+### Internal Build Workflow (Rusha Corp. Developers)
+For security in this public repository, internal registry pushes are performed locally via `make` using your host credentials. This serves as our local "pipeline".
+
+1. **Configure Environment**: Ensure your local `.env` file contains the internal `DOCKER_REGISTRY`, `DOCKER_REPO`, and `AWS_REGION`.
+2. **Build & Push**:
+   ```bash
+   make push
+   ```
+3. **Formal Release**:
+   This project uses semantic versioning. Releasing will automatically update `pyproject.toml`, push to GitHub, create a GitHub Release, and push the versioned image to the internal registry.
+   ```bash
+   make patch   # Increment v0.1.0 -> v0.1.1
+   make minor   # Increment v0.1.0 -> v0.2.0
+   make major   # Increment v0.1.0 -> v1.0.0
+   # OR use an explicit version
+   make release VERSION=v1.2.3
+   ```
+This workflow ensures that internal registry details and credentials are never exposed in GitHub Actions or public CI/CD logs.
+
+### Releases
+Proper releases are managed via Git tags. Creating a tag will trigger a versioned build.
+```bash
+./scripts/release.sh v1.0.0
+```
+
+## 4. Service Details
+
+### Spark Thrift Server
+Starts the Hive Thrift Server 2 on Kubernetes or locally.
+- **Usage**: `./start_thrift_server_k8s.sh` or via Docker Compose.
+- **Port**: 10000
 
 ### MLflow
-
-MLflow is an open-source platform for managing the end-to-end machine learning lifecycle.
-
-- **Build Context**: `.`
-- **Dockerfile**: `Dockerfile`
-- **Environment Variables**:
-  - `AWS_ACCESS_KEY_ID`
-  - `AWS_SECRET_ACCESS_KEY`
-  - `AWS_DEFAULT_REGION`
-  - `AWS_SESSION_TOKEN`
-- **Command**: `mlflow server --backend-store-uri postgresql://postgres:password@postgres:5432/postgres --default-artifact-root ${ARTIFACTS_ROOT} --host 0.0.0.0 --port 5000`
-- **Volumes**:
-  - `./tmp:/tmp`
-  - `./mlflow:/mlflow`
-- **Networks**: `spark-container-network`
-- **Restart Policy**: `always`
+Manages machine learning lifecycles.
+- **URL**: `http://localhost:5000`
 
 ### Iceberg REST
+Provides a REST interface for Apache Iceberg catalogs.
+- **URL**: `http://localhost:8181`
 
-Iceberg REST provides a REST interface for Apache Iceberg.
+## 5. Security & Development
+- **No Secrets**: Never commit secrets or `.env` files. Audit history regularly.
+- **Local Context**: Always build from the local workspace to ensure uncommitted changes are tested.
+- **Dependencies**: Scala dependencies are managed via `build.sbt` and Python via `pyproject.toml`.
 
-- **Image**: `apache/iceberg-rest-fixture`
-- **Container Name**: `iceberg-rest`
-- **Networks**: `spark-container-network`
-- **Restart Policy**: `always`
-- **Environment Variables**:
-  - `AWS_ACCESS_KEY_ID`
-  - `AWS_SECRET_ACCESS_KEY`
-  - `AWS_REGION`
-  - `CATALOG_WAREHOUSE`
-  - `CATALOG_IO__IMPL`
-  - `CATALOG_S3_ENDPOINT`
-  - `CATALOG_JDBC__IMPL`
-  - `CATALOG_JDBC__URL`
-  - `CATALOG_JDBC__USER`
-  - `CATALOG_JDBC__PASSWORD`
-
-### Ingress
-
-Ingress is used to expose HTTP and HTTPS routes from outside the Kubernetes cluster to services within the cluster.
-
-- **Image**: `nginx:latest`
-- **Ports**:
-  - `80:80`
-  - `443:443`
-- **Volumes**:
-  - `./nginx.conf:/etc/nginx/nginx.conf`
-  - `./certs:/etc/letsencrypt`
-- **Networks**: `spark-container-network`
-- **Restart Policy**: `always`
-
-## Network Configuration
-
-All services are connected to the `spark-container-network` network, which is external to the Docker Compose setup.
+---
+*Maintained by Rusha Corp.*

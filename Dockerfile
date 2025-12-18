@@ -1,7 +1,7 @@
 # ------------------------------
 # Stage 1: Build Fat JAR with SBT
 # ------------------------------
-FROM openjdk:17-jdk-slim AS build
+FROM eclipse-temurin:17-jdk-jammy AS build
 
 RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https
 
@@ -23,7 +23,7 @@ RUN sbt assembly
 # ------------------------------
 # Stage 2: Runtime Spark Setup
 # ------------------------------
-FROM openjdk:17-jdk-slim AS runtime
+FROM eclipse-temurin:17-jdk-jammy AS runtime
 
 # Set Spark version, Hadoop version, and paths
 ARG SPARK_VERSION=3.5.3
@@ -101,7 +101,7 @@ RUN rm -rf "$SPARK_TMP"
 # Add entrypoint scripts
 COPY scripts/*.sh /
 # Make scripts executable
-RUN chmod +x /start_*.sh
+RUN chmod +x /*.sh
 
 # Copy Fat JAR dependencies from build stage
 COPY --from=build /app/target/lib/* ${SPARK_HOME}/jars/

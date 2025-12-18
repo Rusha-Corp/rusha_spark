@@ -52,11 +52,12 @@ export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1
 "${SPARK_HOME}/bin/spark-submit" \
   --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2 \
   --master ${SPARK_MASTER} \
-  --conf spark.sql.warehouse.dir=${SPARK_WAREHOUSE_DIR}/iceberg_catalog \
+  --conf spark.sql.warehouse.dir=${SPARK_WAREHOUSE_DIR} \
   --conf spark.hadoop.hive.metastore.uris=${METASTORE_URIS} \
   --conf spark.sql.catalogImplementation=hive \
-  --conf spark.sql.hive.thriftServer.singleSession=false \
-  --conf spark.sql.hive.thriftServer.enable.doAs=false \
+  --conf spark.sql.hive.thriftServer.singleSession=true \
+  --conf hive.server2.transport.mode=binary \
+  --conf spark.sql.hive.thriftServer.enable.doAs=true \
   --conf spark.hadoop.fs.s3a.aws.credentials.provider=${HADOOP_AWS_CREDENTIAL_PROVIDER_CLASS} \
   --conf spark.hadoop.fs.impl=org.apache.iceberg.aws.s3.S3FileIO \
   --conf spark.hadoop.fs.s3a.access.key=${AWS_ACCESS_KEY_ID} \
@@ -64,12 +65,8 @@ export HADOOP_CLIENT_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xmx56g -J-Xmx1
   --conf spark.hadoop.fs.s3a.session.token=${AWS_SESSION_TOKEN} \
   --conf spark.hadoop.fs.s3a.path.style.access=true \
   --conf spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions \
-  --conf spark.sql.catalog.spark_catalog=org.apache.iceberg.spark.SparkSessionCatalog \
-  --conf spark.sql.catalog.iceberg_catalog=org.apache.iceberg.spark.SparkCatalog \
-  --conf spark.sql.catalog.iceberg_catalog.type=hive \
-  --conf spark.sql.catalog.iceberg_catalog.uri=${METASTORE_URIS} \
-  --conf spark.sql.catalog.iceberg_catalog.warehouse=${SPARK_WAREHOUSE_DIR}/iceberg_catalog \
-  --conf spark.sql.defaultCatalog=iceberg_catalog \
+  --conf spark.sql.catalog.default=org.apache.iceberg.spark.SparkCatalog \
+  --conf spark.sql.defaultCatalog=default \
   --conf spark.eventLog.enabled=true \
   --conf spark.eventLog.dir=${SPARK_LOG_DIR} \
   --conf spark.driver.memory=${SPARK_DRIVER_MEMORY} \

@@ -41,15 +41,18 @@ services:
     profiles:
       - common
       - spark-node
+      - thrift
 
   hue:
-    image: gethue/hue:latest
+    image: hue-local:latest
     hostname: hue
     container_name: hue
+    ports:
+      - "8888:8888"
     depends_on:
       - spark-thrift-server
     volumes:
-      - ./conf:/usr/share/hue/desktop/conf
+      - ./conf/z-hue.ini:/usr/share/hue/desktop/conf/z-hue.ini
     networks:
       - spark-container-network
     restart: unless-stopped
@@ -60,6 +63,7 @@ services:
           memory: 16G
     profiles:
       - common
+      - thrift
 
   ml:
     build:
@@ -147,10 +151,8 @@ services:
       - .env
     volumes:
       - ./es-data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
     profiles:
-      - prod
+      - common
     deploy:
       resources:
         limits:
