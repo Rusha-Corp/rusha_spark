@@ -1,8 +1,63 @@
-certs
+# ===================================
+# DOCKER BUILD OPTIMIZATION
+# ===================================
 
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# Build artifacts (SBT/Scala)
+target/
+project/target/
+project/project/target/
+
+# IDE and editors
+.idea/
+.vscode/
+.devcontainer
+*.swp
+*.swo
+*~
+
+# Test files
+test*.ipynb
+test.py
+testapi.py
+test.*
+
+# Infrastructure configs
+docker-compose.yml
+nginx.conf
+conf/
 hosts.ini
 
-testapi.py
+# Certificates and secrets
+certs/
+certs
+.ssh
+
+# Data directories
+es-data/
+local/
+mlflow/
+metastore_db/
+spark-warehouse/
+responses/
+
+# Logs
+logs/
+logs-*
+*.log
+derby.log
+
+# Temporary files
+tmp/
+tmp
+.bsb
+
+# Compressed files
+*.zip
 .Rproj.user
 .Rhistory
 .Rdata
@@ -13,6 +68,13 @@ testapi.py
 responses
 rsconnect-python
 .env*
+.venv/
+tmp/
+target/
+logs/
+logs-*
+certs/
+mlflow/
 
 .ssh
 
