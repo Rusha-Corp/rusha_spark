@@ -44,9 +44,9 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         # Core utilities
         wget tar bash curl gnupg procps netcat \
-        # PostgreSQL client library
-        libpq-dev \
-        # Build dependencies for Python (will remove after)
+        # PostgreSQL development (needed for psycopg2)
+        libpq-dev postgresql-client \
+        # Build dependencies for Python and C extensions
         build-essential libssl-dev zlib1g-dev libbz2-dev \
         libreadline-dev libsqlite3-dev libffi-dev && \
     # Build Python 3.12 from source
@@ -63,10 +63,7 @@ RUN apt-get update && \
     # Create symbolic links
     ln -sf /usr/local/bin/python3.12 /usr/bin/python3 && \
     ln -sf /usr/local/bin/pip3.12 /usr/bin/pip3 && \
-    # Remove build dependencies to save space
-    apt-get purge -y build-essential libssl-dev zlib1g-dev \
-        libbz2-dev libreadline-dev libsqlite3-dev libffi-dev && \
-    apt-get autoremove -y && \
+    # Clean apt cache but keep build tools for Python packages
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     # Verify installation
@@ -89,13 +86,22 @@ RUN chmod +x /*.sh
 COPY --from=build /app/target/lib/* ${SPARK_HOME}/jars/
 
 # Install Python dependencies using Poetry
-# Install poetry, export dependencies, install them, then remove poetry
-RUN pip3 install --no-cache-dir poetry
+# Install poetry, export dependencies, install them, then cleanup
+RUN pip3 install --no-cache-dir poetry && \
+    poetry self add poetry-plugin-export
+
 COPY pyproject.toml poetry.lock ./
+
 RUN poetry export --without-hashes -f requirements.txt -o requirements.txt && \
     pip3 install --no-cache-dir -r requirements.txt && \
     pip3 uninstall -y poetry && \
-    rm -rf /root/.cache/pip /root/.cache/pypoetry requirements.txt
+    # Remove build dependencies after all Python packages are installed
+    apt-get purge -y build-essential libssl-dev zlib1g-dev \
+        libbz2-dev libreadline-dev libsqlite3-dev libffi-dev && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    # Clean all caches
+    rm -rf /root/.cache/pip /root/.cache/pypoetry requirements.txt /var/lib/apt/lists/*
 
 # Set default command
 CMD ["bash"]
