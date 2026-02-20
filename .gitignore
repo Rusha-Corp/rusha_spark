@@ -13,6 +13,7 @@ testapi.py
 responses
 rsconnect-python
 .env*
+test-data.json.gz
 
 .ssh
 

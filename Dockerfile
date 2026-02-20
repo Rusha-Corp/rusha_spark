@@ -32,10 +32,13 @@ RUN sbt assembly
 FROM eclipse-temurin:17-jdk-jammy AS runtime
 
 # Set Spark version, Hadoop version, and paths
-ARG SPARK_VERSION=3.5.3
+ARG SPARK_VERSION=3.5.8
 ARG HADOOP_VERSION=3
+ARG HADOOP_NATIVE_VERSION=3.3.6
 ARG SCALA_VERSION=2.12
 ENV SPARK_HOME=/opt/spark
+ENV HADOOP_HOME=/opt/hadoop
+ENV LD_LIBRARY_PATH=${HADOOP_HOME}/lib/native
 ENV PATH=${SPARK_HOME}/bin:${SPARK_HOME}/sbin:$PATH
 
 
@@ -44,13 +47,14 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         # Core utilities
         wget tar bash curl gnupg procps netcat \
+        # Hadoop native runtime deps
+        libsnappy1v5 liblz4-1 libzstd1 libbz2-1.0 libssl3 libisal2 \
         # PostgreSQL development (needed for psycopg2)
         libpq-dev postgresql-client \
         # Build dependencies for Python and C extensions
         build-essential libssl-dev zlib1g-dev libbz2-dev \
         libreadline-dev libsqlite3-dev libffi-dev && \
-    # Build Python 3.12 from source
-    PYTHON_VERSION=3.12.0 && \
+    PYTHON_VERSION=3.12.12 && \
     PYTHON_TGZ_URL="https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz" && \
     TMP_DIR=$(mktemp -d) && cd "$TMP_DIR" && \
     wget -q "$PYTHON_TGZ_URL" -O python.tgz && \
@@ -77,6 +81,15 @@ RUN SPARK_TGZ_URL="https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/
     tar -xzf spark.tgz -C /opt && \
     mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} ${SPARK_HOME} && \
     rm -rf "$SPARK_TMP"
+
+# Download and install Hadoop native libs
+RUN HADOOP_TGZ_URL="https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_NATIVE_VERSION}/hadoop-${HADOOP_NATIVE_VERSION}.tar.gz" && \
+    HADOOP_TMP="$(mktemp -d)" && \
+    cd "$HADOOP_TMP" && \
+    wget -q -O hadoop.tgz "$HADOOP_TGZ_URL" && \
+    tar -xzf hadoop.tgz -C /opt && \
+    mv /opt/hadoop-${HADOOP_NATIVE_VERSION} ${HADOOP_HOME} && \
+    rm -rf "$HADOOP_TMP"
 # Add entrypoint scripts
 COPY scripts/*.sh /
 # Make scripts executable
@@ -99,6 +112,11 @@ RUN poetry export --without-hashes -f requirements.txt -o requirements.txt && \
     apt-get purge -y build-essential libssl-dev zlib1g-dev \
         libbz2-dev libreadline-dev libsqlite3-dev libffi-dev && \
     apt-get autoremove -y && \
+    LIBSSL_DEB_URL="https://launchpadlibrarian.net/715615335/libssl1.1_1.1.1f-1ubuntu2.22_amd64.deb" && \
+    wget -q -O /tmp/libssl1.1.deb "$LIBSSL_DEB_URL" && \
+    dpkg -i /tmp/libssl1.1.deb || (apt-get -f install -y && dpkg -i /tmp/libssl1.1.deb) && \
+    rm -f /tmp/libssl1.1.deb && \
+    ln -sf /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so && \
     apt-get clean && \
     # Clean all caches
     rm -rf /root/.cache/pip /root/.cache/pypoetry requirements.txt /var/lib/apt/lists/*

@@ -1,0 +1,5 @@
+FROM 217493348668.dkr.ecr.eu-west-2.amazonaws.com/rusha-spark-3.5-base:33f4684
+
+RUN pip3 install --no-cache-dir pyspark==3.5.8
+
+COPY test-data.json.gz /opt/spark/test-data.json.gz

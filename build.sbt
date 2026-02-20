@@ -4,17 +4,17 @@ scalaVersion := "2.12.19"  // Use a Scala version compatible with Spark
 javacOptions ++= Seq("-source", "17", "-target", "17")  // Java 17 compatibility
 
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-core" % "3.5.3" % Provided,
-  "org.apache.spark" %% "spark-sql" % "3.5.3" % Provided,
-  "org.apache.spark" %% "spark-hive" % "3.5.3" % Provided,
-  "io.delta" %% "delta-spark" % "3.2.1",
-  "org.apache.spark" %% "spark-hadoop-cloud" % "3.5.3",
-  "org.apache.hadoop" % "hadoop-aws" % "3.3.4",
+  "org.apache.spark" %% "spark-core" % "3.5.8" % Provided,
+  "org.apache.spark" %% "spark-sql" % "3.5.8" % Provided,
+  "org.apache.spark" %% "spark-hive" % "3.5.8" % Provided,
+  "io.delta" %% "delta-spark" % "3.3.2",
+  "org.apache.spark" %% "spark-hadoop-cloud" % "3.5.8",
+  "org.apache.hadoop" % "hadoop-aws" % "3.3.6",
   "io.unitycatalog" %% "unitycatalog-spark" % "0.2.1",
-  "org.apache.iceberg" %% "iceberg-spark-runtime-3.5" % "1.7.1",
-  "org.apache.iceberg" % "iceberg-aws" % "1.7.1" % "runtime",
-  "org.apache.iceberg" % "iceberg-aws-bundle" % "1.7.1",
-  "org.projectnessie.nessie-integrations" %% "nessie-spark-extensions-3.5" % "0.99.0"
+  "org.apache.iceberg" %% "iceberg-spark-runtime-3.5" % "1.10.1",
+  "org.apache.iceberg" % "iceberg-aws" % "1.10.1" % "runtime",
+  "org.apache.iceberg" % "iceberg-aws-bundle" % "1.10.1",
+  "org.projectnessie.nessie-integrations" %% "nessie-spark-extensions-3.5" % "0.105.6"
 ).map(
   _.exclude("org.slf4j", "slf4j-api") // Exclude SLF4J API
   .exclude("org.slf4j", "slf4j-log4j12") // Exclude SLF4J Log4j binding

@@ -32,7 +32,7 @@ nginx.conf
 conf/
 hosts.ini
 
-# Certificates and secrets
+# Certificates and auth material
 certs/
 certs
 .ssh
