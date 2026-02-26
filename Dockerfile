@@ -34,7 +34,7 @@ FROM eclipse-temurin:17-jdk-jammy AS runtime
 # Set Spark version, Hadoop version, and paths
 ARG SPARK_VERSION=3.5.8
 ARG HADOOP_VERSION=3
-ARG HADOOP_NATIVE_VERSION=3.3.4
+ARG HADOOP_NATIVE_VERSION=3.3.6
 ARG SCALA_VERSION=2.12
 ENV SPARK_HOME=/opt/spark
 ENV HADOOP_HOME=/opt/hadoop
