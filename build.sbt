@@ -13,6 +13,7 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-common" % "3.3.6",
   "org.apache.hadoop" % "hadoop-client-api" % "3.3.6",
   "org.apache.hadoop" % "hadoop-client-runtime" % "3.3.6",
+  "com.amazonaws" % "aws-java-sdk-bundle" % "1.12.367",
   "io.unitycatalog" %% "unitycatalog-spark" % "0.2.1",
   "org.apache.iceberg" %% "iceberg-spark-runtime-3.5" % "1.10.1",
   "org.apache.iceberg" % "iceberg-aws" % "1.10.1" % "runtime",

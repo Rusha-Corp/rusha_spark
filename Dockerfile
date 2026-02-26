@@ -98,7 +98,8 @@ RUN chmod +x /*.sh
 COPY --from=build /app/target/lib/* ${SPARK_HOME}/jars/
 
 # Ensure Hadoop and AWS SDK version alignment by removing conflicting versions
-RUN find ${SPARK_HOME}/jars/ -name "hadoop-*-3.4.0.jar" -delete
+RUN find ${SPARK_HOME}/jars/ -name "hadoop-*-3.4.0.jar" -delete && \
+    find ${SPARK_HOME}/jars/ -name "hadoop-*-3.3.4.jar" -delete
 
 # Install Python dependencies using Poetry
 # Install poetry, export dependencies, install them, then cleanup
