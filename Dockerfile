@@ -38,6 +38,8 @@ ARG HADOOP_NATIVE_VERSION=3.3.6
 ARG SCALA_VERSION=2.12
 ENV SPARK_HOME=/opt/spark
 ENV HADOOP_HOME=/opt/hadoop
+ENV HADOOP_COMMON_LIB_NATIVE_DIR=${HADOOP_HOME}/lib/native
+ENV HADOOP_OPTS="${HADOOP_OPTS} -Djava.library.path=${HADOOP_HOME}/lib/native"
 ENV LD_LIBRARY_PATH=${HADOOP_HOME}/lib/native
 ENV PATH=${SPARK_HOME}/bin:${SPARK_HOME}/sbin:$PATH
 
@@ -75,21 +77,15 @@ RUN apt-get update && \
 
 # Download and install Spark in a single layer
 RUN SPARK_TGZ_URL="https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" && \
-    SPARK_TMP="$(mktemp -d)" && \
-    cd "$SPARK_TMP" && \
-    wget -q -O spark.tgz "$SPARK_TGZ_URL" && \
-    tar -xzf spark.tgz -C /opt && \
-    mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} ${SPARK_HOME} && \
-    rm -rf "$SPARK_TMP"
+    wget -qO- "$SPARK_TGZ_URL" | tar -xz -C /opt && \
+    mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} ${SPARK_HOME}
 
 # Download and install Hadoop native libs
 RUN HADOOP_TGZ_URL="https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_NATIVE_VERSION}/hadoop-${HADOOP_NATIVE_VERSION}.tar.gz" && \
-    HADOOP_TMP="$(mktemp -d)" && \
-    cd "$HADOOP_TMP" && \
-    wget -q -O hadoop.tgz "$HADOOP_TGZ_URL" && \
-    tar -xzf hadoop.tgz -C /opt && \
-    mv /opt/hadoop-${HADOOP_NATIVE_VERSION} ${HADOOP_HOME} && \
-    rm -rf "$HADOOP_TMP"
+    mkdir -p ${HADOOP_HOME}/lib && \
+    wget -qO- "$HADOOP_TGZ_URL" | tar -xz -C /opt && \
+    mv /opt/hadoop-${HADOOP_NATIVE_VERSION}/lib/native ${HADOOP_HOME}/lib/native && \
+    rm -rf /opt/hadoop-${HADOOP_NATIVE_VERSION}
 # Add entrypoint scripts
 COPY scripts/*.sh /
 # Make scripts executable

@@ -1,5 +1,10 @@
-FROM 217493348668.dkr.ecr.eu-west-2.amazonaws.com/rusha-spark-3.5-base:33f4684
+FROM rusha-spark-3.5-base:latest
 
 RUN pip3 install --no-cache-dir pyspark==3.5.8
 
 COPY test-data.json.gz /opt/spark/test-data.json.gz
+COPY generate_concat_data.py /opt/spark/generate_concat_data.py
+COPY verify_concat_gzip.py /opt/spark/verify_concat_gzip.py
+COPY run_gzip_test.sh /opt/spark/run_gzip_test.sh
+
+RUN chmod +x /opt/spark/run_gzip_test.sh
