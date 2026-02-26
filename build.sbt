@@ -8,7 +8,7 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-sql" % "3.5.8" % Provided,
   "org.apache.spark" %% "spark-hive" % "3.5.8" % Provided,
   "io.delta" %% "delta-spark" % "3.3.0",
-  "org.apache.spark" %% "spark-hadoop-cloud" % "3.5.8" exclude("org.apache.hadoop", "hadoop-client-api") exclude("org.apache.hadoop", "hadoop-client-runtime"),
+  "org.apache.spark" %% "spark-hadoop-cloud" % "3.5.8",
   "org.apache.hadoop" % "hadoop-aws" % "3.3.6",
   "org.apache.hadoop" % "hadoop-common" % "3.3.6",
   "org.apache.hadoop" % "hadoop-client-api" % "3.3.6",
