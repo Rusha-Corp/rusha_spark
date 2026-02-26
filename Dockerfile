@@ -82,10 +82,13 @@ RUN SPARK_TGZ_URL="https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/
 
 # Download and install Hadoop native libs
 RUN HADOOP_TGZ_URL="https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_NATIVE_VERSION}/hadoop-${HADOOP_NATIVE_VERSION}.tar.gz" && \
-    mkdir -p ${HADOOP_HOME}/lib && \
-    wget -qO- "$HADOOP_TGZ_URL" | tar -xz -C /opt && \
-    mv /opt/hadoop-${HADOOP_NATIVE_VERSION}/lib/native ${HADOOP_HOME}/lib/native && \
-    rm -rf /opt/hadoop-${HADOOP_NATIVE_VERSION}
+    mkdir -p ${HADOOP_HOME}/lib/native && \
+    TMP_DIR=$(mktemp -d) && cd "$TMP_DIR" && \
+    wget -qO- "$HADOOP_TGZ_URL" | tar -xz && \
+    cp -r hadoop-${HADOOP_NATIVE_VERSION}/lib/native/* ${HADOOP_HOME}/lib/native/ && \
+    # Move common JARs to HADOOP_HOME/lib for visibility to some tools
+    cp hadoop-${HADOOP_NATIVE_VERSION}/share/hadoop/common/hadoop-common-${HADOOP_NATIVE_VERSION}.jar ${HADOOP_HOME}/lib/ && \
+    cd / && rm -rf "$TMP_DIR"
 # Add entrypoint scripts
 COPY scripts/*.sh /
 # Make scripts executable
