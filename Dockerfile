@@ -34,7 +34,7 @@ FROM eclipse-temurin:17-jdk-jammy AS runtime
 # Set Spark version, Hadoop version, and paths
 ARG SPARK_VERSION=3.5.8
 ARG HADOOP_VERSION=3
-ARG HADOOP_NATIVE_VERSION=3.3.6
+ARG HADOOP_NATIVE_VERSION=3.3.4
 ARG SCALA_VERSION=2.12
 ENV SPARK_HOME=/opt/spark
 ENV HADOOP_HOME=/opt/hadoop
@@ -93,6 +93,9 @@ RUN chmod +x /*.sh
 
 # Copy Fat JAR dependencies from build stage
 COPY --from=build /app/target/lib/* ${SPARK_HOME}/jars/
+
+# Ensure Hadoop and AWS SDK version alignment by removing conflicting versions
+RUN find ${SPARK_HOME}/jars/ -name "hadoop-*-3.4.0.jar" -delete
 
 # Install Python dependencies using Poetry
 # Install poetry, export dependencies, install them, then cleanup
