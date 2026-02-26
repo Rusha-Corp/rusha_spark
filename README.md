@@ -1,10 +1,10 @@
-# Rusha Spark 3.5.3 Base
+# Rusha Spark 3.5.8 Base
 
-This repository contains the infrastructure and code for the **Rusha Spark 3.5.3 Base**, a unified Spark environment designed for production SQL interfaces, machine learning experimentation, and interactive development.
+This repository contains the infrastructure and code for the **Rusha Spark 3.5.8 Base**, a unified Spark environment designed for production SQL interfaces, machine learning experimentation, and interactive development.
 
 ## 1. Project Overview
 
-The core of this project is a **Base Spark Image** (`rusha-spark-3.5.3-base`) that serves as the foundation for multiple Spark-based services. This repository is specifically focused on supporting various Spark services like the **Thrift Server**.
+The core of this project is a **Base Spark Image** (`rusha-spark-3.5.8-base`) that serves as the foundation for multiple Spark-based services. This repository is specifically focused on supporting various Spark services like the **Thrift Server**.
 
 It includes native support for:
 - **Nessie**: Git-like versioning for Data Lakes.
@@ -13,6 +13,7 @@ It includes native support for:
 - **Unity Catalog**: Unified governance for data and AI.
 - **Hive**: Metadata management and SQL interface.
 - **AWS Integration**: Full S3 and AWS SDK support.
+- **Hadoop Native Decompressors**: Robust support for concatenated (multi-member) GZIP files using Hadoop 3.3.6.
 
 ### Architecture Visualization
 
