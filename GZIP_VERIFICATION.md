@@ -7,6 +7,7 @@ This document explains how concatenated (multi-member) GZIP support was verified
 To support concatenated GZIP files, the environment must use the Hadoop Native Decompressor instead of falling back to the standard Java `GZIPInputStream`. The base image is configured with the following:
 
 *   **Hadoop Version**: 3.3.6 (Native libraries and aligned JARs).
+*   **JobConf Fix**: Added `hadoop-mapreduce-client-core`, `hadoop-mapreduce-client-common`, and `hadoop-mapreduce-client-jobclient` to ensure `org.apache.hadoop.mapred.JobConf` is available for Spark Context initialization.
 *   **Library Path**: Native libraries (`.so` files) are located at `/opt/hadoop/lib/native/`.
 *   **JNI Hook**: `hadoop-common-3.3.6.jar` is placed in `/opt/hadoop/lib/` to enable the `NativeCodeLoader` to bridge Java calls to the native C libraries.
 *   **Environment Variables**:
@@ -42,4 +43,4 @@ For developers using this image as a base:
 
 ## 4. Verified Image
 The latest verified image containing these fixes is:
-**`217493348668.dkr.ecr.eu-west-2.amazonaws.com/rusha-spark-3.5-base:0e20955`**
+**`217493348668.dkr.ecr.eu-west-2.amazonaws.com/rusha-spark-3.5-base:4ca6409`**
