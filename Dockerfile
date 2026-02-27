@@ -51,8 +51,6 @@ RUN apt-get update && \
         wget tar bash curl gnupg procps netcat \
         # Hadoop native runtime deps
         libsnappy1v5 liblz4-1 libzstd1 libbz2-1.0 libssl3 libisal2 \
-        # PostgreSQL development (needed for psycopg2)
-        libpq-dev postgresql-client \
         # Build dependencies for Python and C extensions
         build-essential libssl-dev zlib1g-dev libbz2-dev \
         libreadline-dev libsqlite3-dev libffi-dev && \
@@ -103,28 +101,15 @@ RUN find ${SPARK_HOME}/jars/ -name "hadoop-*-3.4.0.jar" -delete && \
     find ${SPARK_HOME}/jars/ -name "hadoop-*-3.3.1.jar" -delete && \
     find ${SPARK_HOME}/jars/ -name "hadoop-*-3.2.0.jar" -delete
 
-# Install Python dependencies using Poetry
-# Install poetry, export dependencies, install them, then cleanup
-RUN pip3 install --no-cache-dir poetry && \
-    poetry self add poetry-plugin-export
-
-COPY pyproject.toml poetry.lock ./
-
-RUN poetry export --without-hashes -f requirements.txt -o requirements.txt && \
-    pip3 install --no-cache-dir -r requirements.txt && \
-    pip3 uninstall -y poetry && \
+# Install Python dependencies
+RUN pip3 install --no-cache-dir pyspark==3.5.8 && \
     # Remove build dependencies after all Python packages are installed
     apt-get purge -y build-essential libssl-dev zlib1g-dev \
         libbz2-dev libreadline-dev libsqlite3-dev libffi-dev && \
     apt-get autoremove -y && \
-    LIBSSL_DEB_URL="https://launchpadlibrarian.net/715615335/libssl1.1_1.1.1f-1ubuntu2.22_amd64.deb" && \
-    wget -q -O /tmp/libssl1.1.deb "$LIBSSL_DEB_URL" && \
-    dpkg -i /tmp/libssl1.1.deb || (apt-get -f install -y && dpkg -i /tmp/libssl1.1.deb) && \
-    rm -f /tmp/libssl1.1.deb && \
-    ln -sf /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so && \
     apt-get clean && \
     # Clean all caches
-    rm -rf /root/.cache/pip /root/.cache/pypoetry requirements.txt /var/lib/apt/lists/*
+    rm -rf /root/.cache/pip /var/lib/apt/lists/*
 
 # Set default command
 CMD ["bash"]
