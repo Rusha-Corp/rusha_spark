@@ -43,4 +43,4 @@ For developers using this image as a base:
 
 ## 4. Verified Image
 The latest verified image containing these fixes is:
-**`217493348668.dkr.ecr.eu-west-2.amazonaws.com/rusha-spark-3.5-base:4ca6409`**
+**`217493348668.dkr.ecr.eu-west-2.amazonaws.com/rusha-spark-3.5-base:619063c`**
