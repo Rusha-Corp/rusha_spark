@@ -18,6 +18,7 @@ Status: PR #1 remains open and unmerged. The workflow install path is corrected 
 - The host has no Go installation. Ran the exact corrected `go install` command and `gitleaks version` in an isolated official `golang:1.26.10-bookworm` container; both exited successfully.
 - Installed actionlint 1.7.12 with the exact workflow Go command in an isolated container and linted the corrected workflow; it passed.
 - `make check`, `make audit`, Gitleaks working-tree scan, enforced Contract Engineering validation, tracker validation, generated projection check, and `git diff --check` passed.
+- After correction commit `0dd2993`, Gitleaks scanned all 181 commits and the working tree without leaks; the enforced Contract Engineering validator, tracker validator, and generated projection check passed again.
 - The actionlint, Gitleaks, ShellCheck, and Hadolint workflow sections not affected by the module-path line are unchanged; Hadolint and ShellCheck had passed locally before this correction (EV004).
 - Push the correction and require the full hosted quality and image-test jobs to pass before merge.
 - Keep PR #1 open. Do not merge or publish an image until hosted checks pass and the independent DEC001 reviewer accepts the scoped exception.

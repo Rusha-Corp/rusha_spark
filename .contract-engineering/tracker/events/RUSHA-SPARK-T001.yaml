@@ -97,3 +97,9 @@ events:
     actor: factory-droid
     occurred_at: "2026-11-06T21:00:55Z"
     summary: Corrected the Gitleaks install path; the exact Go install/version check, actionlint, make check/audit, secret scan, and locked protocol/tracker/projection checks passed. Returning to Validation; hosted PR checks remain pending.
+  - event_id: RUSHA-SPARK-T001-E017
+    packet_id: RUSHA-SPARK-T001-P001
+    type: validation_progress
+    actor: factory-droid
+    occurred_at: "2026-11-06T21:11:55Z"
+    summary: After correction commit 0dd299383f16df1c57fff070e879835738377286, Gitleaks scanned 181 commits and the working tree without leaks; enforced packet, tracker, and projection checks passed. Ready to push the correction and rerun PR CI.
