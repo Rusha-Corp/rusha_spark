@@ -4,7 +4,7 @@ Date: 2026-11-06
 Repository: `Rusha-Corp/rusha_spark`
 Worktree: `/tmp/rusha-spark-ghcr`
 Branch: `feat/spark-4.1.4-ghcr-ci`
-Status: The original local Trivy gate failed; remediation under DEC002 now passes locally. The branch remains unpushed pending final commit/history verification and hosted CI.
+Status: The original local Trivy gate failed; remediation under DEC002 now passes locally and is committed. The branch remains unpushed pending hosted CI.
 
 ## Passed locally
 

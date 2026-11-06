@@ -61,3 +61,15 @@ events:
     actor: factory-droid
     occurred_at: "2026-11-06T19:25:55Z"
     summary: Applied DEC002's Java 21 and fixed dependency overrides, excluded only the optional Connect client and YARN shuffle artifacts still reported by Trivy, and passed local runtime and critical-image scans; protocol and hosted CI gates remain.
+  - event_id: RUSHA-SPARK-T001-E011
+    packet_id: RUSHA-SPARK-T001-P001
+    type: implementation_committed
+    actor: factory-droid
+    occurred_at: "2026-11-06T19:52:55Z"
+    summary: Committed the DEC002 remediation as 2e1cce14094fed4d07c8b7de3dd3839eb0d1568f; post-commit history/protocol checks and hosted CI remain.
+  - event_id: RUSHA-SPARK-T001-E012
+    packet_id: RUSHA-SPARK-T001-P001
+    type: validation_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T20:00:55Z"
+    summary: Moved the packet from Implementing to Validation after local build, smoke, Trivy, Gitleaks history, and locked protocol/render checks passed; final record commit scans, hosted PR CI, and independent DEC001 review remain.
