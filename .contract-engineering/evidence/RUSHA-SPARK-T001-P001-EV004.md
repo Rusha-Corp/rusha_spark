@@ -29,7 +29,7 @@ Status: Local build, runtime smoke, critical Trivy gate, and final post-implemen
 
 ## Remaining gates and limits
 
-- Push the feature branch and open a PR; hosted PR CI, including its independent image build and Trivy scan, remains required.
+- PR #1 is open. Its initial hosted quality check failed during tool installation; see EV005. Rerun all hosted checks after the workflow correction.
 - The image has not been published. Independent reviewer acceptance of DEC001 is still required before merge.
 - No live S3 request, Kubernetes cluster test, GHCR publication, package visibility/access change, secret change, ECR/AWS infrastructure change, or deployment was performed.
 - The Trivy gate covers fixable CRITICAL findings and ignores unfixed findings; higher-severity-policy disposition and license inventory remain governed by DEC001 and its required independent review.

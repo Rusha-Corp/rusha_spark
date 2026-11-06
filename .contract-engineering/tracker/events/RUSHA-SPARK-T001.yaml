@@ -79,3 +79,21 @@ events:
     actor: factory-droid
     occurred_at: "2026-11-06T20:11:55Z"
     summary: Final post-commit Gitleaks history/worktree scans and locked protocol/tracker/render validators passed; Spark is ready for a PR, with hosted CI and independent DEC001 review required before merge.
+  - event_id: RUSHA-SPARK-T001-E014
+    packet_id: RUSHA-SPARK-T001-P001
+    type: rework_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T20:32:55Z"
+    summary: Hosted PR run 42288587320 failed during tool installation because CI used the obsolete github.com/gitleaks/gitleaks/v8 module path; downstream image jobs were skipped. Record the missed local verification of this exact install command and correct it before rerunning validation.
+  - event_id: RUSHA-SPARK-T001-E015
+    packet_id: RUSHA-SPARK-T001-P001
+    type: implementation_restarted
+    actor: factory-droid
+    occurred_at: "2026-11-06T20:50:55Z"
+    summary: Verified the corrected Gitleaks module path by installing v8.30.1 in an isolated Go 1.26.10 container; resumed implementation to update the workflow and rerun gates.
+  - event_id: RUSHA-SPARK-T001-E016
+    packet_id: RUSHA-SPARK-T001-P001
+    type: validation_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T21:00:55Z"
+    summary: Corrected the Gitleaks install path; the exact Go install/version check, actionlint, make check/audit, secret scan, and locked protocol/tracker/projection checks passed. Returning to Validation; hosted PR checks remain pending.

@@ -29,5 +29,5 @@ rows:
       - .agent/skills/hadoop-native-check/SKILL.md
       - .factory/droids/ecr-image-builder.md
       - .contract-engineering/
-    next_action: Push the feature branch and open a PR; hosted CI and independent DEC001 review remain required before merge.
+    next_action: Commit the validated workflow correction and evidence, update the packet head, rerun post-commit checks, then push; hosted CI and independent DEC001 review remain required before merge.
     updated_at: "2026-11-06"

@@ -6,14 +6,14 @@ packet_class: single-domain
 work_type: delivery
 priority: high
 iteration: "2026-11-06"
-revision: 5
+revision: 8
 lease_ref: null
 fencing_token: "RUSHA-SPARK-T001-P001-F001"
 worktree:
   path: /tmp/rusha-spark-ghcr
   branch: feat/spark-4.1.4-ghcr-ci
   base_revision: 3f3271c9ef98793c3365011b108abc2edced114e
-  head_revision: 2e1cce14094fed4d07c8b7de3dd3839eb0d1568f
+  head_revision: 54812c5c045befa8712ead5466f31b1870034aec
   cleanup_status: active
 title: Upgrade Rusha Spark base to 4.1.4 and publish through GHCR CI
 objective: Build and validate a Spark 4.1.4 base image with the approved connector versions, then publish short-SHA and 4.1.4 tags to GHCR from main-only CI with provenance and digest verification.
@@ -244,6 +244,7 @@ evidence_refs:
   - RUSHA-SPARK-T001-P001-EV002
   - RUSHA-SPARK-T001-P001-EV003
   - RUSHA-SPARK-T001-P001-EV004
+  - RUSHA-SPARK-T001-P001-EV005
 handoff_ref: null
 skill_gaps: []
 cleanup_scope:
