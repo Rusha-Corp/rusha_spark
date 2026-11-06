@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk-jammy@sha256:057a0daec60e87c96571bf5c9c7792065bcb19e804d584cd37d4144038a35717 AS build
+FROM eclipse-temurin:21-jdk-jammy@sha256:4b1a74fbffbe6b4e7b6f0171a472478282fb463790a51edf10e465d578f22b69 AS build
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN set -eux; \
@@ -22,13 +22,16 @@ RUN sbt update
 COPY src/ src/
 RUN sbt compile
 
-FROM eclipse-temurin:17-jdk-jammy@sha256:057a0daec60e87c96571bf5c9c7792065bcb19e804d584cd37d4144038a35717 AS runtime
+FROM eclipse-temurin:21-jdk-jammy@sha256:4b1a74fbffbe6b4e7b6f0171a472478282fb463790a51edf10e465d578f22b69 AS runtime
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG SPARK_VERSION=4.1.4
+ARG SPARK_DOWNLOAD_BASE=https://archive.apache.org/dist/spark
 ARG HADOOP_VERSION=3
 ARG HADOOP_NATIVE_VERSION=3.4.2
-ARG HADOOP_AWS_SDK_V2_VERSION=2.29.52
+ARG HADOOP_AWS_SDK_V2_VERSION=2.57.10
+ARG NETTY_VERSION=4.2.17.Final
+ARG DERBY_VERSION=10.17.1.0
 ARG SCALA_VERSION=2.13.17
 ARG PYTHON_VERSION=3.12.16
 ARG PY4J_VERSION=0.10.9.9
@@ -41,6 +44,8 @@ ENV HADOOP_HOME=/opt/hadoop
 ENV HADOOP_COMMON_LIB_NATIVE_DIR=/opt/hadoop/lib/native
 ENV HADOOP_NATIVE_VERSION=${HADOOP_NATIVE_VERSION}
 ENV HADOOP_AWS_SDK_V2_VERSION=${HADOOP_AWS_SDK_V2_VERSION}
+ENV NETTY_VERSION=${NETTY_VERSION}
+ENV DERBY_VERSION=${DERBY_VERSION}
 ENV SPARK_VERSION=${SPARK_VERSION}
 ENV SCALA_VERSION=${SCALA_VERSION}
 ENV PYTHON_VERSION=${PYTHON_VERSION}
@@ -70,8 +75,9 @@ RUN set -eux; \
     python3 --version; \
     rm -rf /tmp/python.tgz /tmp/python-src
 
+# Keep Kubernetes submission support; remove unused Connect client and YARN shuffle artifacts.
 RUN set -eux; \
-    curl -fsSL "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" -o /tmp/spark.tgz; \
+    curl -fsSL "${SPARK_DOWNLOAD_BASE}/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" -o /tmp/spark.tgz; \
     echo "${SPARK_SHA512}  /tmp/spark.tgz" | sha512sum --check --strict -; \
     tar -xzf /tmp/spark.tgz -C /opt; \
     mv "/opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" "${SPARK_HOME}"; \
@@ -83,6 +89,13 @@ RUN set -eux; \
     distribution_hadoop_version="${distribution_hadoop_version%.jar}"; \
     printf 'Spark distribution Hadoop client version: %s\n' "$distribution_hadoop_version"; \
     test "$distribution_hadoop_version" = "$HADOOP_NATIVE_VERSION"; \
+    rm -f "${SPARK_HOME}"/jars/netty-*-4.2.7.Final*.jar \
+        "${SPARK_HOME}"/jars/bundle-*.jar \
+        "${SPARK_HOME}"/jars/derby*.jar \
+        "${SPARK_HOME}/jars/connect-repl/spark-connect-client-jvm_2.13-${SPARK_VERSION}.jar" \
+        "${SPARK_HOME}/jars/connect-repl/spark-connect-client-jdbc_2.13-${SPARK_VERSION}.jar" \
+        "${SPARK_HOME}/bin/spark-connect-shell" \
+        "${SPARK_HOME}/yarn/spark-${SPARK_VERSION}-yarn-shuffle.jar"; \
     rm -f /tmp/spark.tgz
 
 RUN set -eux; \
@@ -102,7 +115,9 @@ COPY scripts/ci/check-runtime-jars.py /tmp/check-runtime-jars.py
 RUN python3 /tmp/check-runtime-jars.py \
       --spark-jars "${SPARK_HOME}/jars" \
       --expected-hadoop "${HADOOP_NATIVE_VERSION}" \
-      --expected-aws-sdk-v2 "${HADOOP_AWS_SDK_V2_VERSION}" && \
+      --expected-aws-sdk-v2 "${HADOOP_AWS_SDK_V2_VERSION}" \
+      --expected-netty "${NETTY_VERSION}" \
+      --expected-derby "${DERBY_VERSION}" && \
     rm -f /tmp/check-runtime-jars.py
 
 RUN set -eux; \

@@ -29,5 +29,5 @@ rows:
       - .agent/skills/hadoop-native-check/SKILL.md
       - .factory/droids/ecr-image-builder.md
       - .contract-engineering/
-    next_action: Implement DEC002 by using Java 21 and fixed dependency overrides; remove optional Connect/YARN artifacts only if the Trivy gate still requires it, then rebuild and rescan before any push.
+    next_action: Commit the validated remediation, rerun history and protocol checks against final HEAD, then push/open a PR; hosted CI and independent DEC001 review remain required before merge.
     updated_at: "2026-11-06"

@@ -55,3 +55,9 @@ events:
     actor: factory-droid
     occurred_at: "2026-11-06T17:47:28Z"
     summary: Recorded DEC002, resolved OQ003, and moved the packet from Rework to Implementing; no dependency or artifact changes have been made yet.
+  - event_id: RUSHA-SPARK-T001-E010
+    packet_id: RUSHA-SPARK-T001-P001
+    type: implementation_progress
+    actor: factory-droid
+    occurred_at: "2026-11-06T19:25:55Z"
+    summary: Applied DEC002's Java 21 and fixed dependency overrides, excluded only the optional Connect client and YARN shuffle artifacts still reported by Trivy, and passed local runtime and critical-image scans; protocol and hosted CI gates remain.

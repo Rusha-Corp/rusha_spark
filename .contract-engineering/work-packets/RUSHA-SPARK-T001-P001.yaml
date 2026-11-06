@@ -6,7 +6,7 @@ packet_class: single-domain
 work_type: delivery
 priority: high
 iteration: "2026-11-06"
-revision: 2
+revision: 3
 lease_ref: null
 fencing_token: "RUSHA-SPARK-T001-P001-F001"
 worktree:
@@ -141,18 +141,18 @@ acceptance_contract:
   criteria:
     - id: RUSHA-SPARK-T001-P001-AC001
       statement: The base image and dependency graph match the user-approved Spark 4.1.4 runtime matrix.
-      expected_result: Spark, Scala, Python, Java, Hadoop, Iceberg, Nessie, Delta, and Unity Catalog versions are verified by the image smoke test and dependency resolution.
+      expected_result: Spark, Scala, Python, Java, Hadoop, AWS SDK v2, Netty, Derby, Iceberg, Nessie, Delta, and Unity Catalog versions are verified by the image smoke test and dependency resolution.
       verification_method: execute
       verification_command: Run the SBT build and scripts/ci/smoke-test.sh in the built test image.
-      evidence_refs: [RUSHA-SPARK-T001-P001-EV001, RUSHA-SPARK-T001-P001-EV003]
+      evidence_refs: [RUSHA-SPARK-T001-P001-EV001, RUSHA-SPARK-T001-P001-EV003, RUSHA-SPARK-T001-P001-EV004]
       failure_result: Any runtime or connector version differs from the approved matrix or fails to load.
       validation_ref: RUSHA-SPARK-T001-P001-VAL001
     - id: RUSHA-SPARK-T001-P001-AC002
       statement: The runtime has no conflicting Hadoop or AWS SDK jar versions and performs the required storage smoke tests.
-      expected_result: The build-time duplicate check passes; the smoke test loads S3A/native libraries and writes/reads Iceberg and Delta data locally.
+      expected_result: The build-time jar-version checks pass; the smoke test initializes S3A without external access, loads Hadoop native libraries and the Kubernetes submission class, confirms the authorized optional artifact exclusions, and writes/reads Iceberg and Delta data locally.
       verification_method: execute
       verification_command: Run make validate against the local image.
-      evidence_refs: [RUSHA-SPARK-T001-P001-EV001, RUSHA-SPARK-T001-P001-EV003]
+      evidence_refs: [RUSHA-SPARK-T001-P001-EV001, RUSHA-SPARK-T001-P001-EV003, RUSHA-SPARK-T001-P001-EV004]
       failure_result: Duplicate conflicting jars or any storage smoke test failure.
       validation_ref: RUSHA-SPARK-T001-P001-VAL002
     - id: RUSHA-SPARK-T001-P001-AC003
@@ -160,7 +160,7 @@ acceptance_contract:
       expected_result: Pull requests only validate; main publishing runs after the validation jobs, uses minimum write permissions, adds source/provenance metadata, and verifies remote digest equality.
       verification_method: inspect
       verification_command: Run actionlint, inspect workflow permissions and triggers, then inspect the hosted CI run and registry digest.
-      evidence_refs: [RUSHA-SPARK-T001-P001-EV001, RUSHA-SPARK-T001-P001-EV003]
+      evidence_refs: [RUSHA-SPARK-T001-P001-EV001, RUSHA-SPARK-T001-P001-EV003, RUSHA-SPARK-T001-P001-EV004]
       failure_result: PR or manual runs can publish, write permissions are broader than necessary, or the digest cannot be verified.
       validation_ref: RUSHA-SPARK-T001-P001-VAL003
     - id: RUSHA-SPARK-T001-P001-AC004
@@ -187,7 +187,7 @@ validation_plan:
   - id: RUSHA-SPARK-T001-P001-VAL002
     kind: integration
     command: make validate
-    expected: Version, dependency-jar, Hadoop native, S3A, Iceberg, and Delta smoke checks pass.
+    expected: Version and dependency-jar checks pass; Hadoop native loading, local-only S3A initialization, Kubernetes submission class loading, authorized optional artifact exclusions, and Iceberg/Delta smoke checks pass.
   - id: RUSHA-SPARK-T001-P001-VAL003
     kind: security
     skill: security-assurance
@@ -243,6 +243,7 @@ evidence_refs:
   - RUSHA-SPARK-T001-P001-EV001
   - RUSHA-SPARK-T001-P001-EV002
   - RUSHA-SPARK-T001-P001-EV003
+  - RUSHA-SPARK-T001-P001-EV004
 handoff_ref: null
 skill_gaps: []
 cleanup_scope:
@@ -260,6 +261,7 @@ cleanup_scope:
   dead_code_review:
     - "baseline (2026-11-06): Dockerfile.test, Makefile, build metadata, and Spark version references reviewed; Dockerfile.test referenced four absent assets, and Makefile/runtime guidance retained Spark 3.5-era defaults."
     - "handoff (2026-11-06): Reviewed the changed Docker, SBT, CI, smoke-test, local-helper, and documentation surfaces. Dockerfile.test's missing-asset references and stale Spark 3.5 defaults are replaced. Legacy ECR helpers remain intentionally retained and are not used by GHCR CI. No new unreachable code or unused dependency was identified."
+    - "security remediation (2026-11-06): Dependency updates left two fixable CRITICAL Trivy records in unused Spark Connect client and YARN shuffle artifact metadata. OWA and lens-ETL source searches found no corresponding workload references; the Kubernetes submission jar/class remains present and loads in smoke validation. DEC002 authorized excluding only the Connect client jars/shell and YARN shuffle jar."
   dead_refs:
     - path: Dockerfile.test
       reference: test-data.json.gz, generate_concat_data.py, verify_concat_gzip.py, run_gzip_test.sh
@@ -269,5 +271,9 @@ cleanup_scope:
       reference: rusha-spark-3.5.3-base and Spark 3.5 jar patterns
       decision: remove
       rationale: Replace stale image and jar references with Spark 4.1 defaults.
+    - path: Dockerfile
+      reference: Spark Connect client/JDBC jars and shell, plus YARN shuffle plugin in the Spark 4.1.4 distribution
+      decision: remove
+      rationale: These optional artifacts retained the two fixable CRITICAL Trivy records after dependency overrides; no OWA or lens-ETL workload uses them, and DEC002 authorized their exclusion while preserving Kubernetes submission.
   stale_refs: []
   temp_refs: []

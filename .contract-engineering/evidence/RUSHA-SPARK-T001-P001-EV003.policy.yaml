@@ -1,13 +1,13 @@
 evidence_policy_version: 1
 packet_id: RUSHA-SPARK-T001-P001
-classification: internal
+classification: confidential
 contains_sensitive_data: false
 data_categories: [security-validation-summary, local-build-results]
 redaction:
   required: true
   performed: true
   reviewer: factory-droid
-  method: "Stores tool versions, scopes, exit results, and a local image identifier only; no raw findings or secrets."
+  method: "Stores redacted vulnerability identifiers, version summaries, exit results, and a local image identifier only; no raw scanner output or secrets."
 secret_scan:
   required: true
   tool: "Gitleaks 8.30.1 directory scan"

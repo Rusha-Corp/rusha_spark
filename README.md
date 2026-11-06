@@ -6,15 +6,19 @@ This repository builds the `ghcr.io/rusha-corp/rusha-spark-4.1-base` image with 
 
 - Spark and PySpark 4.1.4
 - Scala 2.13.17
-- Java 17
+- Java 21
 - Python 3.12.16
 - Hadoop client and native libraries 3.4.2
+- AWS SDK v2 2.57.10
+- Netty 4.2.17.Final
+- Derby 10.17.1.0
 - Iceberg 1.12.0
 - Nessie 0.110.0
 - Delta Lake 4.4.1
 - Unity Catalog 0.4.1
 
 The image includes the Spark SQL integrations, Hadoop S3A support, and native Hadoop decompression libraries.
+Spark Kubernetes submission remains available; the unused Spark Connect client jars and YARN shuffle plugin are excluded.
 
 ## Image publishing
 
