@@ -1,0 +1,33 @@
+task_id: RUSHA-SPARK-T001
+schema_version: 1
+events:
+  - event_id: RUSHA-SPARK-T001-E001
+    packet_id: RUSHA-SPARK-T001-P001
+    type: created
+    actor: factory-droid
+    occurred_at: "2026-11-06T10:18:00Z"
+    summary: Created the Spark 4.1.4 and GHCR CI packet from the user-approved implementation spec.
+  - event_id: RUSHA-SPARK-T001-E002
+    packet_id: RUSHA-SPARK-T001-P001
+    type: claimed
+    actor: factory-droid
+    occurred_at: "2026-11-06T10:18:01Z"
+    summary: Claimed the isolated rusha_spark worktree and declared source, workflow, documentation, and protocol-record locks.
+  - event_id: RUSHA-SPARK-T001-E003
+    packet_id: RUSHA-SPARK-T001-P001
+    type: implementation_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T10:20:00Z"
+    summary: Completed the source, toolchain, code-health, and test baseline; recorded the user-approved design and threat model, then advanced to Implementing.
+  - event_id: RUSHA-SPARK-T001-E004
+    packet_id: RUSHA-SPARK-T001-P001
+    type: scope_changed
+    actor: user
+    occurred_at: "2026-11-06T10:52:57Z"
+    summary: Explicitly approved adding the removal of AWS credential-value logging from scripts/start_thrift_server.sh to the packet scope.
+  - event_id: RUSHA-SPARK-T001-E005
+    packet_id: RUSHA-SPARK-T001-P001
+    type: validation_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T14:01:50Z"
+    summary: Local image, runtime, code-health, workflow, and security checks passed; entering validation while hosted PR CI and independent DEC001 review remain pending.

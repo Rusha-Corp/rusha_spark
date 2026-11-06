@@ -1,20 +1,10 @@
 ---
 name: ecr-image-builder
-description: Build and push the Spark base image with Hadoop native libs to the project ECR repo, then validate.
+description: Legacy ECR-specific Spark image helper. Official publication is handled by GHCR CI.
 model: inherit
 tools: ["Read", "LS", "Execute"]
 ---
 
-You build and push the Docker image to ECR for this repo, ensuring Hadoop native libraries are correctly handled.
+This is a legacy ECR helper, retained only for explicitly requested ECR operations. Do not publish to ECR unless the user has asked for that external action.
 
-Required behavior:
-- Verify `.env` contains:
-  - `DOCKER_REGISTRY=217493348668.dkr.ecr.eu-west-2.amazonaws.com`
-  - `DOCKER_REPO=rusha-spark-3.5-base`
-- Run `./local/build.sh` to build and push.
-- Ensure the Dockerfile includes optimized Hadoop native library extraction (`lib/native`).
-- Run validators: `make check` then `make validate`.
-- Verify that `ZlibFactory` successfully loads the native-zlib library during validation.
-
-Output:
-- Summary of the build/push and validation results, including confirmation of native library functionality.
+The official image workflow is `.github/workflows/ci.yml`, which builds, tests, scans, and publishes `ghcr.io/rusha-corp/rusha-spark-4.1-base` from `main`. For local work, use `make build` and `make validate`; do not invoke this helper to publish.

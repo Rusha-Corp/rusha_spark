@@ -1,0 +1,4 @@
+tracker_schema_version: 1
+partition: archive
+max_rows: 50
+rows: []

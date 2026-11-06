@@ -1,0 +1,234 @@
+name: Spark base image CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spark-base-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  quality:
+    name: Quality and security checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install actionlint and Gitleaks
+        run: |
+          mkdir -p "$RUNNER_TEMP/bin"
+          GOBIN="$RUNNER_TEMP/bin" go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+          GOBIN="$RUNNER_TEMP/bin" go install github.com/gitleaks/gitleaks/v8@v8.30.1
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Lint workflow
+        run: actionlint .github/workflows/*.yml
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: error
+
+      - name: Lint test Dockerfile
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
+        with:
+          dockerfile: Dockerfile.test
+          failure-threshold: error
+
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes shellcheck
+
+      - name: Lint changed shell scripts
+        run: shellcheck --severity=warning scripts/start_thrift_server.sh scripts/ci/smoke-test.sh local/build.sh
+
+      - name: Scan repository history with Gitleaks
+        run: gitleaks detect --source . --redact --no-banner --exit-code 1
+
+      - name: Scan working tree with Gitleaks
+        run: gitleaks dir --redact --no-banner --exit-code 1 .
+
+      - name: Run repository checks
+        run: |
+          make check
+          make audit
+
+  build-test:
+    name: Build and test image
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    needs: quality
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Build the runtime image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: rusha-spark-4.1-base:ci
+          labels: |
+            org.opencontainers.image.source=https://github.com/Rusha-Corp/rusha_spark
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=4.1.4
+          cache-from: type=gha,scope=spark-base-main
+          cache-to: type=gha,scope=spark-base-pr,mode=max
+          provenance: false
+
+      - name: Run runtime smoke test
+        run: |
+          docker run --rm \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/scripts/ci/check-runtime-jars.py,target=/usr/local/bin/check-runtime-jars.py,readonly" \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/scripts/ci/smoke-test.sh,target=/usr/local/bin/smoke-test.sh,readonly" \
+            rusha-spark-4.1-base:ci \
+            bash /usr/local/bin/smoke-test.sh
+
+      - name: Scan image vulnerabilities and licenses
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: rusha-spark-4.1-base:ci
+          format: table
+          scanners: vuln,license
+          vuln-type: os,library
+          ignore-unfixed: true
+          severity: CRITICAL
+          exit-code: "1"
+          version: v0.70.0
+
+  publish:
+    name: Validate and publish image to GHCR
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    needs: quality
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    env:
+      IMAGE: ghcr.io/rusha-corp/rusha-spark-4.1-base
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Build the runtime image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: rusha-spark-4.1-base:publish
+          labels: |
+            org.opencontainers.image.source=https://github.com/Rusha-Corp/rusha_spark
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=4.1.4
+          cache-from: type=gha,scope=spark-base-main
+          cache-to: type=gha,scope=spark-base-main,mode=max
+          provenance: false
+
+      - name: Run runtime smoke test
+        run: |
+          docker run --rm \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/scripts/ci/check-runtime-jars.py,target=/usr/local/bin/check-runtime-jars.py,readonly" \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/scripts/ci/smoke-test.sh,target=/usr/local/bin/smoke-test.sh,readonly" \
+            rusha-spark-4.1-base:publish \
+            bash /usr/local/bin/smoke-test.sh
+
+      - name: Scan image vulnerabilities and licenses
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: rusha-spark-4.1-base:publish
+          format: table
+          scanners: vuln,license
+          vuln-type: os,library
+          ignore-unfixed: true
+          severity: CRITICAL
+          exit-code: "1"
+          version: v0.70.0
+
+      - name: Resolve image tags
+        id: tags
+        run: printf 'short_sha=%s\n' "$(git rev-parse --short=7 "$GITHUB_SHA")" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push the validated image
+        env:
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
+        run: |
+          docker tag rusha-spark-4.1-base:publish "$IMAGE:$SHORT_SHA"
+          docker tag rusha-spark-4.1-base:publish "$IMAGE:4.1.4"
+          docker push "$IMAGE:$SHORT_SHA"
+          docker push "$IMAGE:4.1.4"
+
+      - name: Verify published tag digests
+        id: verify
+        env:
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
+        run: |
+          sha_digest="$(docker buildx imagetools inspect "$IMAGE:$SHORT_SHA" --format '{{.Manifest.Digest}}')"
+          version_digest="$(docker buildx imagetools inspect "$IMAGE:4.1.4" --format '{{.Manifest.Digest}}')"
+          printf '%s: %s\n' "$SHORT_SHA" "$sha_digest"
+          printf '4.1.4: %s\n' "$version_digest"
+          test -n "$sha_digest"
+          test "$sha_digest" = "$version_digest"
+          printf 'digest=%s\n' "$sha_digest" >> "$GITHUB_OUTPUT"
+
+      - name: Attest published image provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.verify.outputs.digest }}
+          push-to-registry: true
+
+      - name: Record published image digest
+        env:
+          SHORT_SHA: ${{ steps.tags.outputs.short_sha }}
+          IMAGE_DIGEST: ${{ steps.verify.outputs.digest }}
+        run: |
+          {
+            echo "## Published Spark base image"
+            echo "- Short-SHA tag: \`$IMAGE:$SHORT_SHA\`"
+            echo "- Version tag: \`$IMAGE:4.1.4\`"
+            echo "- Verified digest: \`$IMAGE_DIGEST\`"
+            echo "- Provenance: signed GitHub artifact attestation"
+          } >> "$GITHUB_STEP_SUMMARY"

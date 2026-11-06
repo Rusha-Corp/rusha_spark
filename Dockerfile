@@ -1,115 +1,115 @@
-# ------------------------------
-# Stage 1: Build Fat JAR with SBT
-# ------------------------------
-FROM eclipse-temurin:17-jdk-jammy AS build
+FROM eclipse-temurin:17-jdk-jammy@sha256:057a0daec60e87c96571bf5c9c7792065bcb19e804d584cd37d4144038a35717 AS build
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-RUN apt-get update && apt-get install -y curl gnupg2 apt-transport-https
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl gnupg2; \
+    curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" -o /tmp/sbt-signing-key.asc; \
+    fingerprint="$(gpg --show-keys --with-colons /tmp/sbt-signing-key.asc | awk -F: '$1 == "fpr" { print $10; exit }')"; \
+    test "$fingerprint" = "2EE0EA64E40A89B84B2DF73499E82A75642AC823"; \
+    gpg --dearmor -o /usr/share/keyrings/sbt-archive-keyring.gpg /tmp/sbt-signing-key.asc; \
+    echo "deb [signed-by=/usr/share/keyrings/sbt-archive-keyring.gpg] https://repo.scala-sbt.org/scalasbt/debian all main" > /etc/apt/sources.list.d/sbt.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends sbt; \
+    rm -rf /var/lib/apt/lists/* /tmp/sbt-signing-key.asc
 
-# Install SBT
-RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/apt/sources.list.d/sbt.list
-RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee /etc/apt/sources.list.d/sbt_old.list
-RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add
-RUN apt-get update
-RUN apt-get install sbt -y
-
-# Set working directory
 WORKDIR /app
 
-# Copy project files and build the Fat JAR
-# Copy build definition files first for better caching
 COPY build.sbt ./
-COPY project/*.sbt project/*.scala project/build.properties project/
-RUN sbt update  # Download dependencies first (cacheable layer)
+COPY project/ project/
+RUN sbt update
 
-# Copy source code and build
 COPY src/ src/
-RUN sbt assembly
+RUN sbt compile
 
+FROM eclipse-temurin:17-jdk-jammy@sha256:057a0daec60e87c96571bf5c9c7792065bcb19e804d584cd37d4144038a35717 AS runtime
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# ------------------------------
-# Stage 2: Runtime Spark Setup
-# ------------------------------
-FROM eclipse-temurin:17-jdk-jammy AS runtime
-
-# Set Spark version, Hadoop version, and paths
-ARG SPARK_VERSION=3.5.8
+ARG SPARK_VERSION=4.1.4
 ARG HADOOP_VERSION=3
-ARG HADOOP_NATIVE_VERSION=3.3.6
-ARG SCALA_VERSION=2.12
+ARG HADOOP_NATIVE_VERSION=3.4.2
+ARG HADOOP_AWS_SDK_V2_VERSION=2.29.52
+ARG SCALA_VERSION=2.13.17
+ARG PYTHON_VERSION=3.12.16
+ARG PY4J_VERSION=0.10.9.9
+ARG PYTHON_SHA256=710c3e75dac8b2f258d9cd0f76e5c4c2e9175fac9e249c98901552f7cf33b7dd
+ARG SPARK_SHA512=1461b6c425d290913e7be97bfec738abc843c663d177dc57e32b82874d20144ed67dcca692a57efc4e5b40d2f001ee0e9e0d2d7b088ae58f5378ecac92739076
+ARG HADOOP_SHA512=79a383e156022d6690da359120b25db8146452265d92a4e890d9ea78c2078a01b661daf78163ee9b4acef7106b01fd5c8d1a55f7ad284f88b31ab3f402ae3acf
+
 ENV SPARK_HOME=/opt/spark
 ENV HADOOP_HOME=/opt/hadoop
-ENV HADOOP_COMMON_LIB_NATIVE_DIR=${HADOOP_HOME}/lib/native
-ENV HADOOP_OPTS="${HADOOP_OPTS} -Djava.library.path=${HADOOP_HOME}/lib/native"
-ENV LD_LIBRARY_PATH=${HADOOP_HOME}/lib/native
-ENV PATH=${SPARK_HOME}/bin:${SPARK_HOME}/sbin:$PATH
+ENV HADOOP_COMMON_LIB_NATIVE_DIR=/opt/hadoop/lib/native
+ENV HADOOP_NATIVE_VERSION=${HADOOP_NATIVE_VERSION}
+ENV HADOOP_AWS_SDK_V2_VERSION=${HADOOP_AWS_SDK_V2_VERSION}
+ENV SPARK_VERSION=${SPARK_VERSION}
+ENV SCALA_VERSION=${SCALA_VERSION}
+ENV PYTHON_VERSION=${PYTHON_VERSION}
+ENV PY4J_VERSION=${PY4J_VERSION}
+ENV HADOOP_OPTS="-Djava.library.path=/opt/hadoop/lib/native"
+ENV LD_LIBRARY_PATH=/opt/hadoop/lib/native
+ENV PATH="/opt/spark/bin:/opt/spark/sbin:${PATH}"
+ENV PYTHONPATH="${SPARK_HOME}/python/lib/pyspark.zip:${SPARK_HOME}/python/lib/py4j-${PY4J_VERSION}-src.zip"
 
-
-# Install system dependencies and build Python 3.12
-RUN apt-get update && \
+RUN set -eux; \
+    apt-get update; \
     apt-get install -y --no-install-recommends \
-        # Core utilities
-        wget tar bash curl gnupg procps netcat \
-        # Hadoop native runtime deps
-        libsnappy1v5 liblz4-1 libzstd1 libbz2-1.0 libssl3 libisal2 \
-        # Build dependencies for Python and C extensions
+        bash curl tar procps netcat-openbsd \
+        libsnappy1v5 liblz4-1 libzstd1 libbz2-1.0 liblzma5 libssl3 libisal2 \
         build-essential libssl-dev zlib1g-dev libbz2-dev \
-        libreadline-dev libsqlite3-dev libffi-dev && \
-    PYTHON_VERSION=3.12.12 && \
-    PYTHON_TGZ_URL="https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz" && \
-    TMP_DIR=$(mktemp -d) && cd "$TMP_DIR" && \
-    wget -q "$PYTHON_TGZ_URL" -O python.tgz && \
-    tar -xf python.tgz && \
-    cd "Python-$PYTHON_VERSION" && \
-    ./configure --enable-optimizations --prefix=/usr/local && \
-    make -j$(nproc) && \
-    make altinstall && \
-    cd / && rm -rf "$TMP_DIR" && \
-    # Create symbolic links
-    ln -sf /usr/local/bin/python3.12 /usr/bin/python3 && \
-    ln -sf /usr/local/bin/pip3.12 /usr/bin/pip3 && \
-    # Clean apt cache but keep build tools for Python packages
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    # Verify installation
-    python3 --version && pip3 --version
+        libreadline-dev libsqlite3-dev libffi-dev liblzma-dev; \
+    curl -fsSL "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" -o /tmp/python.tgz; \
+    echo "${PYTHON_SHA256}  /tmp/python.tgz" | sha256sum --check --strict -; \
+    mkdir -p /tmp/python-src; \
+    tar -xzf /tmp/python.tgz -C /tmp/python-src; \
+    cd "/tmp/python-src/Python-${PYTHON_VERSION}"; \
+    ./configure --prefix=/usr/local; \
+    make -j"$(nproc)"; \
+    make altinstall; \
+    ln -sf /usr/local/bin/python3.12 /usr/bin/python3; \
+    ln -sf /usr/local/bin/pip3.12 /usr/bin/pip3; \
+    python3 --version; \
+    rm -rf /tmp/python.tgz /tmp/python-src
 
-# Download and install Spark in a single layer
-RUN SPARK_TGZ_URL="https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" && \
-    wget -qO- "$SPARK_TGZ_URL" | tar -xz -C /opt && \
-    mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} ${SPARK_HOME}
+RUN set -eux; \
+    curl -fsSL "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" -o /tmp/spark.tgz; \
+    echo "${SPARK_SHA512}  /tmp/spark.tgz" | sha512sum --check --strict -; \
+    tar -xzf /tmp/spark.tgz -C /opt; \
+    mv "/opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" "${SPARK_HOME}"; \
+    test -f "${SPARK_HOME}/python/lib/pyspark.zip"; \
+    test -f "${SPARK_HOME}/python/lib/py4j-${PY4J_VERSION}-src.zip"; \
+    hadoop_api_jar="$(find "${SPARK_HOME}/jars" -maxdepth 1 -type f -name 'hadoop-client-api-*.jar' -print -quit)"; \
+    test -n "$hadoop_api_jar"; \
+    distribution_hadoop_version="${hadoop_api_jar##*/hadoop-client-api-}"; \
+    distribution_hadoop_version="${distribution_hadoop_version%.jar}"; \
+    printf 'Spark distribution Hadoop client version: %s\n' "$distribution_hadoop_version"; \
+    test "$distribution_hadoop_version" = "$HADOOP_NATIVE_VERSION"; \
+    rm -f /tmp/spark.tgz
 
-# Download and install Hadoop native libs
-RUN HADOOP_TGZ_URL="https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_NATIVE_VERSION}/hadoop-${HADOOP_NATIVE_VERSION}.tar.gz" && \
-    mkdir -p ${HADOOP_HOME}/lib/native && \
-    TMP_DIR=$(mktemp -d) && cd "$TMP_DIR" && \
-    wget -qO- "$HADOOP_TGZ_URL" | tar -xz && \
-    cp -r hadoop-${HADOOP_NATIVE_VERSION}/lib/native/* ${HADOOP_HOME}/lib/native/ && \
-    # Move common JARs to HADOOP_HOME/lib for visibility to some tools
-    cp hadoop-${HADOOP_NATIVE_VERSION}/share/hadoop/common/hadoop-common-${HADOOP_NATIVE_VERSION}.jar ${HADOOP_HOME}/lib/ && \
-    cd / && rm -rf "$TMP_DIR"
-# Add entrypoint scripts
+RUN set -eux; \
+    curl -fsSL "https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_NATIVE_VERSION}/hadoop-${HADOOP_NATIVE_VERSION}.tar.gz" -o /tmp/hadoop.tgz; \
+    echo "${HADOOP_SHA512}  /tmp/hadoop.tgz" | sha512sum --check --strict -; \
+    mkdir -p /tmp/hadoop-src /opt/hadoop/lib/native /opt/hadoop/lib; \
+    tar -xzf /tmp/hadoop.tgz -C /tmp/hadoop-src; \
+    cp -a "/tmp/hadoop-src/hadoop-${HADOOP_NATIVE_VERSION}/lib/native/." "${HADOOP_HOME}/lib/native/"; \
+    cp "/tmp/hadoop-src/hadoop-${HADOOP_NATIVE_VERSION}/share/hadoop/common/hadoop-common-${HADOOP_NATIVE_VERSION}.jar" "${HADOOP_HOME}/lib/"; \
+    rm -rf /tmp/hadoop.tgz /tmp/hadoop-src
+
 COPY scripts/*.sh /
-# Make scripts executable
 RUN chmod +x /*.sh
 
-# Copy Fat JAR dependencies from build stage
-COPY --from=build /app/target/lib/* ${SPARK_HOME}/jars/
+COPY --from=build /app/target/lib/*.jar ${SPARK_HOME}/jars/
+COPY scripts/ci/check-runtime-jars.py /tmp/check-runtime-jars.py
+RUN python3 /tmp/check-runtime-jars.py \
+      --spark-jars "${SPARK_HOME}/jars" \
+      --expected-hadoop "${HADOOP_NATIVE_VERSION}" \
+      --expected-aws-sdk-v2 "${HADOOP_AWS_SDK_V2_VERSION}" && \
+    rm -f /tmp/check-runtime-jars.py
 
-# Ensure Hadoop and AWS SDK version alignment by removing conflicting versions
-RUN find ${SPARK_HOME}/jars/ -name "hadoop-*-3.4.0.jar" -delete && \
-    find ${SPARK_HOME}/jars/ -name "hadoop-*-3.3.4.jar" -delete && \
-    find ${SPARK_HOME}/jars/ -name "hadoop-*-3.3.1.jar" -delete && \
-    find ${SPARK_HOME}/jars/ -name "hadoop-*-3.2.0.jar" -delete
-
-# Install Python dependencies
-RUN pip3 install --no-cache-dir pyspark==3.5.8 && \
-    # Remove build dependencies after all Python packages are installed
+RUN set -eux; \
     apt-get purge -y build-essential libssl-dev zlib1g-dev \
-        libbz2-dev libreadline-dev libsqlite3-dev libffi-dev && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    # Clean all caches
+        libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev; \
+    apt-get autoremove -y; \
+    apt-get clean; \
     rm -rf /root/.cache/pip /var/lib/apt/lists/*
 
-# Set default command
 CMD ["bash"]

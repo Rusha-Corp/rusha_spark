@@ -1,114 +1,59 @@
-# Rusha Spark 3.5.8 Base
+# Rusha Spark 4.1.4 Base
 
-This repository contains the infrastructure and code for the **Rusha Spark 3.5.8 Base**, a unified Spark environment designed for production SQL interfaces, machine learning experimentation, and interactive development.
+This repository builds the `ghcr.io/rusha-corp/rusha-spark-4.1-base` image with Apache Spark 4.1.4 and its supported runtime libraries.
 
-## 1. Project Overview
+## Runtime versions
 
-The core of this project is a **Base Spark Image** (`rusha-spark-3.5.8-base`) that serves as the foundation for multiple Spark-based services. This repository is specifically focused on supporting various Spark services like the **Thrift Server**.
+- Spark and PySpark 4.1.4
+- Scala 2.13.17
+- Java 17
+- Python 3.12.16
+- Hadoop client and native libraries 3.4.2
+- Iceberg 1.12.0
+- Nessie 0.110.0
+- Delta Lake 4.4.1
+- Unity Catalog 0.4.1
 
-It includes native support for:
-- **Nessie**: Git-like versioning for Data Lakes.
-- **Apache Iceberg**: High-performance table format.
-- **Delta Lake**: Reliable data lakes with ACID transactions.
-- **Unity Catalog**: Unified governance for data and AI.
-- **Hive**: Metadata management and SQL interface.
-- **AWS Integration**: Full S3 and AWS SDK support.
-- **Hadoop Native Decompressors**: Robust support for concatenated (multi-member) GZIP files using Hadoop 3.3.6.
+The image includes the Spark SQL integrations, Hadoop S3A support, and native Hadoop decompression libraries.
 
-### Architecture Visualization
+## Image publishing
 
-```mermaid
-graph TD
-    subgraph Repo [GitHub Repository]
-        Code[Source Code / Scala / Python]
-        Docs[Consolidated Documentation]
-        Release[GitHub Releases / Tags]
-    end
+`.github/workflows/ci.yml` runs quality checks, builds and smoke-tests the image, then scans it for critical vulnerabilities and licenses.
 
-    subgraph Build_Process [Build & Registry]
-        Local[Local Workspace] -->|docker build| BaseImage[Base Spark Image]
-        BaseImage -->|push| Registry[Container Registry]
-        Release -->|Trigger| Local
-    end
+- Pull requests and manual workflow runs validate the image but do not publish it.
+- A push to `main` publishes to GHCR only after all checks pass.
+- CI publishes both the seven-character source commit tag and `4.1.4`, adds a GitHub artifact provenance attestation, and verifies that both tags resolve to the build digest.
+- The package must be public or grant `packages: read` access to consumers such as lens-ETL.
 
-    subgraph Runtime [Services]
-        Registry -->|Pull| Thrift[Spark Thrift Server]
-        Registry -->|Pull| MLflow[MLflow Server]
-        Registry -->|Pull| DevNode[Spark Dev Node]
-    end
+Published image:
+```text
+ghcr.io/rusha-corp/rusha-spark-4.1-base:4.1.4
 ```
 
-## 2. Getting Started
+## Local development
 
-### Prerequisites
-- Docker & Docker Buildx
-- Java 17 & SBT (for building Scala components)
-- Python 3.12 & Poetry
+Requirements: Docker with Buildx, Poetry 2.x, and Git.
 
-### Environment Variables
-The following variables are required for various services. It is recommended to manage them via a `.env` file (ignored by git).
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SPARK_MASTER` | URL of the Spark master | - |
-| `SPARK_WAREHOUSE_DIR` | Directory for Spark warehouse | - |
-| `METASTORE_URIS` | URIs for the Hive metastore | - |
-| `DOCKER_REGISTRY` | (Optional) Destination container registry | - |
-| `DOCKER_REPO` | (Optional) Destination repository name | `rusha-spark-3.5.3-base` |
-
-## 3. Build & Release Process
-
-### Local Build
-To build the base image locally:
+Build locally, then run the runtime checks:
 ```bash
-./local/build.sh
-```
-By default, this will build and tag the image locally. To push to a remote registry, set the `DOCKER_REGISTRY` environment variable in your `.env` file.
-
-### Internal Build Workflow (Rusha Corp. Developers)
-For security in this public repository, internal registry pushes are performed locally via `make` using your host credentials. This serves as our local "pipeline".
-
-1. **Configure Environment**: Ensure your local `.env` file contains the internal `DOCKER_REGISTRY`, `DOCKER_REPO`, and `AWS_REGION`.
-2. **Build & Push**:
-   ```bash
-   make push
-   ```
-3. **Formal Release**:
-   This project uses semantic versioning. Releasing will automatically update `pyproject.toml`, push to GitHub, create a GitHub Release, and push the versioned image to the internal registry.
-   ```bash
-   make patch   # Increment v0.1.0 -> v0.1.1
-   make minor   # Increment v0.1.0 -> v0.2.0
-   make major   # Increment v0.1.0 -> v1.0.0
-   # OR use an explicit version
-   make release VERSION=v1.2.3
-   ```
-This workflow ensures that internal registry details and credentials are never exposed in GitHub Actions or public CI/CD logs.
-
-### Releases
-Proper releases are managed via Git tags. Creating a tag will trigger a versioned build.
-```bash
-./scripts/release.sh v1.0.0
+make build
+make validate
 ```
 
-## 4. Service Details
+`make validate` builds `Dockerfile.test` from the local image and runs `scripts/ci/smoke-test.sh`. The smoke test checks runtime versions and required jars, loads the Nessie, S3A, native Hadoop, and Unity Catalog classes, and writes and reads Iceberg and Delta data locally.
 
-### Spark Thrift Server
-Starts the Hive Thrift Server 2 on Kubernetes or locally.
-- **Usage**: `./start_thrift_server_k8s.sh` or via Docker Compose.
-- **Port**: 10000
+`DOCKER_REPO` can override the local image name. `DOCKER_REGISTRY` is supported by the legacy local helper for explicitly requested registry operations; it is not the official publishing path.
 
-### MLflow
-Manages machine learning lifecycles.
-- **URL**: `http://localhost:5000`
+## Legacy release helper
 
-### Iceberg REST
-Provides a REST interface for Apache Iceberg catalogs.
-- **URL**: `http://localhost:8181`
+`scripts/release.sh` and the Makefile release targets are a separate legacy workflow and are not used by GHCR CI. This change does not alter their behavior. Do not use them to publish the managed GHCR image.
 
-## 5. Security & Development
-- **No Secrets**: Never commit secrets or `.env` files. Audit history regularly.
-- **Local Context**: Always build from the local workspace to ensure uncommitted changes are tested.
-- **Dependencies**: Scala dependencies are managed via `build.sbt` and Python via `pyproject.toml`.
+## Services
 
----
-*Maintained by Rusha Corp.*
+The image supports Spark services such as the Thrift Server, MLflow integrations, and Iceberg REST. Service orchestration remains separate from image publication.
+
+## Security
+
+- Do not commit secrets or `.env` files.
+- CI runs Gitleaks over repository history and scans the built image with Trivy.
+- PySpark and Py4J come from the SHA-512-verified Spark distribution; Python dependency versions are pinned in `poetry.lock`.

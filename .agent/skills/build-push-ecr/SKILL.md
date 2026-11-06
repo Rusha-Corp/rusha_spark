@@ -1,24 +1,14 @@
 ---
 name: build-push-ecr
-description: Build and push the Spark image to the project ECR repo using local/build.sh and validate the result.
+description: Legacy ECR-specific local build helper. Official Spark image publishing uses GHCR CI.
 disable-model-invocation: true
 ---
 
-# Build & Push ECR Image
+# Legacy ECR Build Helper
 
-## Inputs
-- ECR registry: `217493348668.dkr.ecr.eu-west-2.amazonaws.com`
-- Repository: `rusha-spark-3.5-base`
+This helper is retained for explicitly requested ECR operations. It is not the official Spark image release path. Do not run it or push to ECR unless the user explicitly asks for that external action.
 
-## Steps
-1. Verify `.env` has:
-   - `DOCKER_REGISTRY=217493348668.dkr.ecr.eu-west-2.amazonaws.com`
-   - `DOCKER_REPO=rusha-spark-3.5-base`
-2. Run `./local/build.sh` to build and push the image.
-3. Run validators:
-   - `make check`
-   - `make validate`
+- Legacy ECR registry: `217493348668.dkr.ecr.eu-west-2.amazonaws.com`
+- Current image repository name: `rusha-spark-4.1-base`
 
-## Success Criteria
-- Build completes and image is pushed.
-- Validators pass with no errors.
+For routine publication, `.github/workflows/ci.yml` builds, tests, scans, and publishes the image to GHCR after a green push to `main`. Local validation uses `make build` followed by `make validate`.

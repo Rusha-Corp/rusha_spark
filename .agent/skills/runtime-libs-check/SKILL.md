@@ -6,14 +6,16 @@ disable-model-invocation: true
 
 # Runtime Libraries Check
 
-## Steps
-1. Verify Spark version:
-   - `spark-submit --version`
-2. Confirm required jars exist in `/opt/spark/jars`:
-   - `ls -la /opt/spark/jars/iceberg-spark-runtime-3.5_*.jar`
-   - `ls -la /opt/spark/jars/nessie-spark-extensions-3.5_*.jar`
-   - `ls -la /opt/spark/jars/unitycatalog-spark_*.jar`
+Run the production-equivalent smoke image after building the base image:
 
-## Success Criteria
-- Spark reports version 3.5.8.
-- All required jars are present in `/opt/spark/jars`.
+```bash
+docker build \
+  --build-arg SPARK_BASE_IMAGE=rusha-spark-4.1-base:latest \
+  --tag rusha-spark-4.1-base-test:local \
+  --file Dockerfile.test .
+docker run --rm rusha-spark-4.1-base-test:local
+```
+
+The test validates Spark 4.1.4, Scala 2.13.17, PySpark 4.1.4, and the required Hadoop 3.4.2, Iceberg 1.12.0, Nessie 0.110.0, Delta 4.4.1, and Unity Catalog 0.4.1 jars. It also loads the Nessie and S3A classes and verifies Hadoop native decompression before exercising local Iceberg and Delta writes and reads.
+
+The image build separately rejects duplicate or version-mismatched Hadoop and AWS SDK jars.

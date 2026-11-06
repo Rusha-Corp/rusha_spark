@@ -7,8 +7,8 @@ if [ -f .env ]; then
     source .env
 fi
 
-IMAGE_NAME="${DOCKER_REPO:-rusha-spark-3.5.3-base}"
-TAG=${1:-$(git rev-parse --short HEAD)}
+IMAGE_NAME="${DOCKER_REPO:-rusha-spark-4.1-base}"
+TAG=${1:-$(git rev-parse --short=7 HEAD)}
 REGISTRY="${DOCKER_REGISTRY}"
 
 if [ -n "$REGISTRY" ]; then
@@ -31,6 +31,7 @@ if [ -n "$REGISTRY" ]; then
 else
     echo "No DOCKER_REGISTRY set. Building image locally..."
     docker buildx build \
+          --load \
           --platform linux/amd64 \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
           -t "${IMAGE_NAME}:${TAG}" \

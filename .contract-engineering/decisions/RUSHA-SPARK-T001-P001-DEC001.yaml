@@ -1,0 +1,37 @@
+decision_version: 1
+decision_id: RUSHA-SPARK-T001-P001-DEC001
+packet_id: RUSHA-SPARK-T001-P001
+status: approved
+title: "Retain the approved fixable-CRITICAL Trivy gate for this packet"
+proposal: >
+  The approved Spark delivery spec sets Trivy to block fixable CRITICAL
+  vulnerabilities and scan license metadata without enforcing a license
+  allow/deny policy. The locked security gate is broader and also blocks
+  HIGH and unfixed findings unless excepted.
+alternatives_considered:
+  - "Strengthen the CI Trivy gate to block all HIGH and CRITICAL findings, including unfixed findings."
+  - "Keep the approved CI policy and run a supplemental HIGH/CRITICAL scan before merge."
+decision: >
+  Keep the approved CI policy for this packet: scan vulnerabilities and
+  licenses, fail on fixable CRITICAL vulnerabilities, ignore unfixed
+  vulnerabilities, and treat license results as inventory only. Record a
+  scoped exception for the broader HIGH/unfixed security-gate requirement.
+  This exception is not effective for merge until an independent reviewer
+  accepts it.
+scope:
+  - "Spark base image CI and initial 4.1.4 release under RUSHA-SPARK-T001-P001 only"
+  - "HIGH and unfixed vulnerability findings are outside this packet's configured Trivy failure threshold"
+  - "License scan results are informational; no license allow/deny policy is authorized"
+controls:
+  - "PR validation remains read-only; GHCR package-write permission is limited to the main-only publish job."
+  - "The publish job scans before GHCR login and image push."
+  - "The image scan includes vulnerability and license scanners and fails on fixable CRITICAL findings."
+  - "An independent reviewer must accept this exception before merge; no merge is authorized while that review is pending."
+  - "The exception expires within 30 days and requires a new decision before expiry if the broader gate remains unresolved."
+approved_by: user
+approved_at: "2026-11-06T12:15:08Z"
+expires_at: "2026-12-06T12:15:08Z"
+success_measure: "The Trivy CI gate passes and an independent reviewer accepts the scoped exception before merge."
+rollback_ref: "3f3271c9ef98793c3365011b108abc2edced114e"
+review_owner: "Independent repository reviewer"
+review_at: "Pending before merge"

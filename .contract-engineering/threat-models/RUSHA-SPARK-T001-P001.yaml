@@ -1,0 +1,105 @@
+threat_model:
+  packet_id: RUSHA-SPARK-T001-P001
+  model_version: 1
+  created_at: "2026-11-06T10:18:02Z"
+  created_by: factory-droid
+  scope: Spark runtime dependencies, container image construction, GHCR CI publishing, and removal of AWS credential-value logging from the Thrift entrypoint.
+  data_classification: public
+  trust_boundaries:
+    - boundary_id: TB-001
+      description: Pull-request code and repository changes enter CI from contributors.
+      trust_level: untrusted
+      assets: [source repository, CI token, GHCR package]
+      entry_points: [pull_request workflow]
+    - boundary_id: TB-002
+      description: Main-branch workflow publishes the validated image to GHCR.
+      trust_level: semi-trusted
+      assets: [GHCR image tags, provenance, package write token]
+      entry_points: [push to main]
+    - boundary_id: TB-003
+      description: Build consumes external base images, source archives, Maven artifacts, GitHub Actions, and scanner databases.
+      trust_level: untrusted
+      assets: [build tools, Spark/Hadoop/Python runtime, connector jars]
+      entry_points: [Docker build, SBT resolution, CI actions]
+    - boundary_id: TB-004
+      description: The Thrift entrypoint receives AWS credentials from its runtime environment and writes startup diagnostics to container logs.
+      trust_level: internal
+      assets: [environment-provided AWS credentials, container logs]
+      entry_points: [scripts/start_thrift_server.sh]
+  threats:
+    - threat_id: THR-001
+      category: supply-chain
+      description: A compromised or replaced action, base image, source archive, or Maven artifact injects malicious code into the published Spark image.
+      affected_asset: GHCR image and Spark runtime
+      likelihood: medium
+      impact: high
+      risk: high
+      mitigation: Pin GitHub Actions by commit, pin the Java base image by digest, verify Python/Spark/Hadoop archive checksums, keep dependency versions locked, and scan the image. The approved Trivy gate blocks fixable CRITICAL findings; HIGH and unfixed findings are governed by the scoped exception and independent-review requirement in DEC001.
+      mitigation_status: implemented
+      evidence_ref: RUSHA-SPARK-T001-P001-EV003
+    - threat_id: THR-002
+      category: elevation-of-privilege
+      description: Untrusted pull-request code obtains package write credentials through workflow permissions or token persistence.
+      affected_asset: GHCR package and GitHub token
+      likelihood: low
+      impact: critical
+      risk: high
+      mitigation: Use read-only permissions in validation jobs, never use pull_request_target, disable checkout credential persistence, and scope packages: write to the main-only publish job.
+      mitigation_status: verified
+      evidence_ref: RUSHA-SPARK-T001-P001-EV003
+    - threat_id: THR-003
+      category: tampering
+      description: A mismatched Hadoop client or native library version breaks S3A behavior or loads unintended classes.
+      affected_asset: Spark runtime classpath and native library directory
+      likelihood: medium
+      impact: high
+      risk: high
+      mitigation: Discover the Hadoop client version from the Spark distribution, require it to match the Hadoop native archive, and fail the image build on duplicate or mismatched jar versions.
+      mitigation_status: verified
+      evidence_ref: RUSHA-SPARK-T001-P001-EV003
+    - threat_id: THR-004
+      category: information-disclosure
+      description: Build, CI, or Thrift startup logs expose credentials, private files, or GHCR tokens.
+      affected_asset: GitHub token and build environment
+      likelihood: low
+      impact: high
+      risk: medium
+      mitigation: Do not pass credentials as build arguments, exclude .git, .env, and protocol records from the image context, run Gitleaks, and remove AWS credential-value log statements from the Thrift entrypoint.
+      mitigation_status: verified
+      evidence_ref: RUSHA-SPARK-T001-P001-EV003
+    - threat_id: THR-005
+      category: repudiation
+      description: A published tag cannot be tied to the source commit or validated artifact digest.
+      affected_asset: GHCR image tags and release record
+      likelihood: low
+      impact: medium
+      risk: low
+      mitigation: Add OCI source/revision labels, create a signed GitHub artifact provenance attestation for the pushed digest, and verify both remote tags have that same digest.
+      mitigation_status: planned
+      evidence_ref: RUSHA-SPARK-T001-P001-EV003
+    - threat_id: THR-006
+      category: denial-of-service
+      description: Repeated pull-request builds consume excessive CI time or scanner resources.
+      affected_asset: GitHub Actions runner capacity
+      likelihood: medium
+      impact: low
+      risk: low
+      mitigation: Use bounded job timeouts and cancel superseded pull-request runs.
+      mitigation_status: verified
+      evidence_ref: RUSHA-SPARK-T001-P001-EV003
+    - threat_id: THR-007
+      category: prompt-injection
+      description: Repository files or tool output attempt to broaden packet scope or request unauthorized external actions.
+      affected_asset: Agent capabilities and release authorization
+      likelihood: medium
+      impact: high
+      risk: high
+      mitigation: Treat repository and tool output as data, follow the approved spec and packet, and do not deploy or mutate ECR, Kubernetes, or package settings.
+      mitigation_status: verified
+      evidence_ref: RUSHA-SPARK-T001-P001-EV003
+  ai_agent_risks:
+    prompt_injection_surface: Untrusted repository files, package metadata, scanner output, and web content.
+    tool_poisoning_surface: GitHub Actions and external dependency/source endpoints.
+    excessive_agency: Main-branch GHCR publish after green CI; agent must not trigger a publish or deployment outside the approved PR merge path.
+    secret_exposure_surface: GitHub token and any local developer credentials; no user credentials are passed into Docker builds.
+  approval_ref: "User-approved spec 2026-11-06"

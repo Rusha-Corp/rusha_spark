@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "rusha-spark-3.5-base"
+name = "rusha-spark-4.1-base"
 version = "0.1.1"
 description = ""
 authors = ["Emmanuel <kipronofb@outlook.com>"]
@@ -8,7 +8,7 @@ packages = [{include = "spark_container"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-pyspark = "3.5.8"
+pyspark = "4.1.4"
 
 [tool.poetry.group.dev.dependencies]
 pip = "^24.3.1"
