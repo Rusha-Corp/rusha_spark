@@ -13,14 +13,20 @@ worktree:
   path: /tmp/rusha-spark-ghcr
   branch: feat/spark-4.1.4-ghcr-ci
   base_revision: 3f3271c9ef98793c3365011b108abc2edced114e
-  head_revision: 3f3271c9ef98793c3365011b108abc2edced114e
+  head_revision: ebbcb07e62b54003d42ff0c19b4fcb3cdd7bfe0b
   cleanup_status: active
 title: Upgrade Rusha Spark base to 4.1.4 and publish through GHCR CI
 objective: Build and validate a Spark 4.1.4 base image with the approved connector versions, then publish short-SHA and 4.1.4 tags to GHCR from main-only CI with provenance and digest verification.
 open_questions:
   - User must set the GHCR package public or grant lens-ETL read access before lens-ETL can consume the image.
   - The scoped Trivy threshold exception requires independent reviewer acceptance before merge.
-state: Validation
+  - id: RUSHA-SPARK-T001-P001-OQ003
+    question: May this packet apply compatible security overrides to the Spark/Hadoop-bundled transitive libraries while keeping the Spark 4.1.4 version fixed?
+    affects_criteria: [RUSHA-SPARK-T001-P001-AC001, RUSHA-SPARK-T001-P001-AC003]
+    owner: user
+    disposition: blocking
+    resolution_ref: null
+state: Rework
 scope:
   in:
     - Dockerfile

@@ -4,7 +4,7 @@ Date: 2026-11-06
 Repository: `Rusha-Corp/rusha_spark`
 Worktree: `/tmp/rusha-spark-ghcr`
 Branch: `feat/spark-4.1.4-ghcr-ci`
-Status: In progress, hosted checks pending
+Status: Rework required; local Trivy gate failed, so the branch has not been pushed and no PR has been opened
 
 ## Passed locally
 
@@ -14,9 +14,16 @@ Status: In progress, hosted checks pending
 - `hadolint` 2.12.0 with the workflow's `failure-threshold: error`: passed on `Dockerfile` and `Dockerfile.test` with no diagnostics.
 - `shellcheck` 0.10.0 with `--severity=warning` on the changed shell scripts: passed.
 - A broader ShellCheck attempt found existing findings in unchanged scripts, including SC1128 in `scripts/start-spark.sh`. To keep this packet in scope, CI lints changed shell scripts; `make check` still syntax-checks every shell script.
-- Gitleaks 8.30.1 redacted working-tree scan: passed on the current worktree, including the decision and evidence records. The history scan passed for the committed base; rerun it after the implementation commit before push.
+- Gitleaks 8.30.1 redacted working-tree scan: passed with the Trivy finding summary recorded. The history scan passed after the implementation commit; rerun after this rework evidence commit and any remediation commit before push.
 - The locked Contract Engineering v3.1.0 preflight, enforced contract-record validator, and tracker validator passed for the complete changed-path set.
-- Manual security review of the complete changed-file set: no high-confidence exploitable finding identified.
+- Manual security review of changed code and workflow controls found no code-level exploit; the separate Trivy image scan below identified upstream dependency vulnerabilities.
+
+## Blocking security finding
+
+- Trivy 0.70.0, installed from the official Linux release archive after verifying SHA-256 `8b4376d5d6befe5c24d503f10ff136d9e0c49f9127a4279fd110b727929a5aa9`, scanned local image `sha256:e3f2e2b3ba410534f7b38d0b0ff1029006becbfc46abf7d5730145ec3416b36d` with `--scanners vuln,license --vuln-type os,library --ignore-unfixed --severity CRITICAL --exit-code 1`. The scan returned exit 1 with 5 CRITICAL findings, all reported with fixed versions.
+- `CVE-2026-75595` (`io.netty:netty-handler`) appears in four artifacts: Hadoop AWS SDK bundle `2.29.52` (Netty `4.1.115.Final`), Spark Connect client `4.1.4`, the standalone Netty `4.2.7.Final` jar, and Spark YARN shuffle `4.1.4`. Trivy lists `4.2.17.Final` or `4.1.137.Final` as fixed versions.
+- `CVE-2022-46337` appears in Derby `10.16.1.1`; Trivy lists `10.16.1.2` as a fixed version.
+- These CRITICAL findings are not covered by DEC001, which only excepts HIGH and unfixed findings. Do not push or open a PR until they are resolved and the scan passes, or the user approves a revised security decision.
 
 ## Superseded build attempt
 
@@ -25,11 +32,10 @@ An earlier final-image attempt using `sbt assembly` exhausted the builder's
 The Dockerfile uses `sbt compile`, which resolved and compiled the dependency
 set, populated `target/lib`, built the final image, and passed `make validate`.
 
-## Pending before merge
+## Pending after remediation and before merge
 
 - Hosted PR CI, including the Trivy vulnerability/license scan and the hosted image build.
 - Independent reviewer acceptance of DEC001 before merge.
-- Re-run Gitleaks history scan after the implementation commit is created.
 - The approved Trivy policy blocks fixable CRITICAL vulnerabilities; HIGH and unfixed findings are covered by the scoped exception in DEC001. License results are informational only.
 - No GHCR publication, remote digest, provenance attestation, or package access change has occurred.
 - CodeQL and a separate GitHub dependency-review job are not part of the approved CI design; this limitation remains for security-gate review.

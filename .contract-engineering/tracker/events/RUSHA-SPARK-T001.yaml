@@ -31,3 +31,9 @@ events:
     actor: factory-droid
     occurred_at: "2026-11-06T14:01:50Z"
     summary: Local image, runtime, code-health, workflow, and security checks passed; entering validation while hosted PR CI and independent DEC001 review remain pending.
+  - event_id: RUSHA-SPARK-T001-E006
+    packet_id: RUSHA-SPARK-T001-P001
+    type: rework_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T14:33:27Z"
+    summary: The CI-matched local Trivy scan found five fixable CRITICAL findings in Netty and Derby; recorded a blocking question on approved remediation scope, with no push or PR.

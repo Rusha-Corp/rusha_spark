@@ -6,7 +6,7 @@ shards: []
 rows:
   - task_id: RUSHA-SPARK-T001
     packet_id: RUSHA-SPARK-T001-P001
-    state: Validation
+    state: Rework
     owner: user
     reviewer: user
     locks:
@@ -29,5 +29,5 @@ rows:
       - .agent/skills/hadoop-native-check/SKILL.md
       - .factory/droids/ecr-image-builder.md
       - .contract-engineering/
-    next_action: Commit the locally validated change and open the authorized PR; require green hosted CI and independent DEC001 acceptance before merge.
+    next_action: Get user direction on the five fixable CRITICAL Trivy findings; remediate and rerun the local scan before any push.
     updated_at: "2026-11-06"
