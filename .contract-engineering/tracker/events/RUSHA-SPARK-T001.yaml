@@ -37,3 +37,9 @@ events:
     actor: factory-droid
     occurred_at: "2026-11-06T14:33:27Z"
     summary: The CI-matched local Trivy scan found five fixable CRITICAL findings in Netty and Derby; recorded a blocking question on approved remediation scope, with no push or PR.
+  - event_id: RUSHA-SPARK-T001-E007
+    packet_id: RUSHA-SPARK-T001-P001
+    type: security_finding
+    actor: factory-droid
+    occurred_at: "2026-11-06T14:41:39Z"
+    summary: Pinned Spark and upstream Derby metadata show that a Trivy-clean fix requires a Java/dependency-matrix change and may require removing optional Connect/YARN artifacts; packet remains blocked in Rework pending user approval.

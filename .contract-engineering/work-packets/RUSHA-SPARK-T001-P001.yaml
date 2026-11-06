@@ -6,14 +6,14 @@ packet_class: single-domain
 work_type: delivery
 priority: high
 iteration: "2026-11-06"
-revision: 0
+revision: 1
 lease_ref: null
 fencing_token: "RUSHA-SPARK-T001-P001-F001"
 worktree:
   path: /tmp/rusha-spark-ghcr
   branch: feat/spark-4.1.4-ghcr-ci
   base_revision: 3f3271c9ef98793c3365011b108abc2edced114e
-  head_revision: ebbcb07e62b54003d42ff0c19b4fcb3cdd7bfe0b
+  head_revision: cf979959904981dad31e0d6ad5c5d28693395590
   cleanup_status: active
 title: Upgrade Rusha Spark base to 4.1.4 and publish through GHCR CI
 objective: Build and validate a Spark 4.1.4 base image with the approved connector versions, then publish short-SHA and 4.1.4 tags to GHCR from main-only CI with provenance and digest verification.
@@ -21,7 +21,7 @@ open_questions:
   - User must set the GHCR package public or grant lens-ETL read access before lens-ETL can consume the image.
   - The scoped Trivy threshold exception requires independent reviewer acceptance before merge.
   - id: RUSHA-SPARK-T001-P001-OQ003
-    question: May this packet apply compatible security overrides to the Spark/Hadoop-bundled transitive libraries while keeping the Spark 4.1.4 version fixed?
+    question: May this packet change the approved Java/dependency matrix and, if needed, remove optional Spark Connect or YARN artifacts to remediate the five CRITICAL findings while retaining Spark 4.1.4? The current Java 17 Derby line has no verified fixed release; Derby 10.17.1.0 fixes the CVE but requires Java 21.
     affects_criteria: [RUSHA-SPARK-T001-P001-AC001, RUSHA-SPARK-T001-P001-AC003]
     owner: user
     disposition: blocking

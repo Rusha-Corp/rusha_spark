@@ -29,5 +29,5 @@ rows:
       - .agent/skills/hadoop-native-check/SKILL.md
       - .factory/droids/ecr-image-builder.md
       - .contract-engineering/
-    next_action: Get user direction on the five fixable CRITICAL Trivy findings; remediate and rerun the local scan before any push.
+    next_action: Obtain user approval to change the Java/dependency matrix and any necessary optional-artifact removal, or keep the PR blocked; no push until Trivy passes or a revised security decision is approved.
     updated_at: "2026-11-06"
