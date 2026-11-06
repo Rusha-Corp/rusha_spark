@@ -4,7 +4,7 @@ Date: 2026-11-06
 Repository: `Rusha-Corp/rusha_spark`
 Worktree: `/tmp/rusha-spark-ghcr`
 Branch: `feat/spark-4.1.4-ghcr-ci`
-Status: Rework required; local Trivy gate failed, so the branch has not been pushed and no PR has been opened
+Status: Remediation authorized under DEC002 and in progress; the original local Trivy gate failed, so the branch remains unpushed and no PR has been opened
 
 ## Passed locally
 
@@ -30,7 +30,7 @@ Status: Rework required; local Trivy gate failed, so the branch has not been pus
 - The upstream Spark 4.1.4 POM pins Netty `4.2.7.Final`, AWS SDK v2 `2.29.52`, and Derby `10.16.1.1` (`https://github.com/apache/spark/blob/v4.1.4/pom.xml`). Changing these versions would alter the approved dependency closure.
 - The built image's AWS SDK bundle, Spark Connect client, and Spark YARN shuffle jars contain Netty Maven metadata but no `io/netty/*.class` entries. The standalone Netty handler jar contains Netty classes. Trivy still reports the older Netty coordinates found in those jars' metadata.
 - Maven Central has no Derby `10.16.1.2` artifact; its metadata lists `10.16.1.1` as the Java 17 line. Apache Derby's official release page says Derby 10.17 requires Java 21, and 10.17.1.0 includes the CVE-2022-46337 LDAP fix. Derby is retired, with no further releases planned (`https://db.apache.org/derby/derby_downloads.html`, `https://db.apache.org/derby/releases/release-10_17_1_0.cgi`).
-- Therefore, no verified fix currently preserves both the approved Java 17 runtime and dependency closure. Retaining Spark 4.1.4 while clearing the findings needs user approval to revise that matrix; removing optional Connect/YARN artifacts also requires explicit approval. No dependency, Java, or artifact changes have been made.
+- Therefore, no verified fix preserves both the original Java 17 runtime and dependency closure. The user has approved retaining Spark 4.1.4 while changing to Java 21 and overriding affected dependencies; optional Connect/YARN artifact removal is approved only if necessary. See DEC002. No remediation changes have been made yet.
 
 ## Superseded build attempt
 

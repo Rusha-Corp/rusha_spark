@@ -43,3 +43,15 @@ events:
     actor: factory-droid
     occurred_at: "2026-11-06T14:41:39Z"
     summary: Pinned Spark and upstream Derby metadata show that a Trivy-clean fix requires a Java/dependency-matrix change and may require removing optional Connect/YARN artifacts; packet remains blocked in Rework pending user approval.
+  - event_id: RUSHA-SPARK-T001-E008
+    packet_id: RUSHA-SPARK-T001-P001
+    type: scope_changed
+    actor: user
+    occurred_at: "2026-11-06T17:47:28Z"
+    summary: Approved retaining Spark 4.1.4 while moving to Java 21 and overriding affected dependencies; optional Connect/YARN artifacts may be removed only if necessary.
+  - event_id: RUSHA-SPARK-T001-E009
+    packet_id: RUSHA-SPARK-T001-P001
+    type: state_transition
+    actor: factory-droid
+    occurred_at: "2026-11-06T17:47:28Z"
+    summary: Recorded DEC002, resolved OQ003, and moved the packet from Rework to Implementing; no dependency or artifact changes have been made yet.

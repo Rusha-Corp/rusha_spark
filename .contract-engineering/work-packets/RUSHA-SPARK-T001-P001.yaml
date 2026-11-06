@@ -6,14 +6,14 @@ packet_class: single-domain
 work_type: delivery
 priority: high
 iteration: "2026-11-06"
-revision: 1
+revision: 2
 lease_ref: null
 fencing_token: "RUSHA-SPARK-T001-P001-F001"
 worktree:
   path: /tmp/rusha-spark-ghcr
   branch: feat/spark-4.1.4-ghcr-ci
   base_revision: 3f3271c9ef98793c3365011b108abc2edced114e
-  head_revision: cf979959904981dad31e0d6ad5c5d28693395590
+  head_revision: 5442a321caa0ddebf654f2d47a9ed96c2af7a646
   cleanup_status: active
 title: Upgrade Rusha Spark base to 4.1.4 and publish through GHCR CI
 objective: Build and validate a Spark 4.1.4 base image with the approved connector versions, then publish short-SHA and 4.1.4 tags to GHCR from main-only CI with provenance and digest verification.
@@ -24,9 +24,9 @@ open_questions:
     question: May this packet change the approved Java/dependency matrix and, if needed, remove optional Spark Connect or YARN artifacts to remediate the five CRITICAL findings while retaining Spark 4.1.4? The current Java 17 Derby line has no verified fixed release; Derby 10.17.1.0 fixes the CVE but requires Java 21.
     affects_criteria: [RUSHA-SPARK-T001-P001-AC001, RUSHA-SPARK-T001-P001-AC003]
     owner: user
-    disposition: blocking
-    resolution_ref: null
-state: Rework
+    disposition: resolved
+    resolution_ref: RUSHA-SPARK-T001-P001-DEC002
+state: Implementing
 scope:
   in:
     - Dockerfile
@@ -120,7 +120,7 @@ baseline_refs:
   - approved spec: /home/vscode/.factory/specs/2026-11-06-spark-4-1-base-on-ghcr-ghcr-only-owa-ci-and-lens-etl-migration-prs.md
   - .contract-engineering/evidence/RUSHA-SPARK-T001-P001-EV001.md
   - Conversation approval 2026-11-06: remove AWS credential value logging from scripts/start_thrift_server.sh.
-design_decision_ref: "Approved spec 2026-11-06; user explicitly approved removal of AWS credential-value logging from scripts/start_thrift_server.sh."
+design_decision_ref: "Approved spec 2026-11-06; RUSHA-SPARK-T001-P001-DEC002."
 data_gate_ref: null
 stability: stable
 deprecation_refs: []
@@ -130,7 +130,7 @@ exception_refs:
   - RUSHA-SPARK-T001-P001-DEC001
 sunset_target: ""
 acceptance_criteria:
-  - The image uses Spark 4.1.4, Scala 2.13.17, Python 3.12.16, Hadoop 3.4.2, and Java 17, with connector versions from the approved spec.
+  - The image uses Spark 4.1.4, Scala 2.13.17, Python 3.12.16, Hadoop 3.4.2, and Java 21, with connector versions from the approved spec.
   - Image startup checks confirm the Spark runtime, connector jars, S3A class, Hadoop native code, and working Iceberg and Delta read/write paths.
   - The Thrift entrypoint does not emit AWS credential values to logs.
   - CI uses SHA-pinned actions, read-only permissions for PR validation, and a main-only GHCR publish job with packages: write scoped to that job.
