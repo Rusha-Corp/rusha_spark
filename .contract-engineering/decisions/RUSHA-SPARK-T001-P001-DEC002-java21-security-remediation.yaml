@@ -1,0 +1,40 @@
+decision_version: 1
+decision_id: RUSHA-SPARK-T001-P001-DEC002
+packet_id: RUSHA-SPARK-T001-P001
+status: approved
+title: "Remediate fixable CRITICAL dependencies while retaining Spark 4.1.4"
+proposal: >
+  Keep Spark 4.1.4 and remediate the five fixable CRITICAL Trivy findings
+  by moving the build and runtime image to Java 21 and updating the affected
+  Netty, AWS SDK v2, and Derby dependency versions.
+alternatives_considered:
+  - "Keep Java 17 and the existing dependency closure, and hold the packet until an upstream compatible fix or new runtime selection is available."
+  - "Keep the current matrix and accept the CRITICAL findings through a revised Trivy exception."
+decision: >
+  The user approved retaining Spark 4.1.4 while changing the Java runtime to
+  Java 21 and overriding affected dependency versions to fixed releases.
+  Removal of the optional Spark Connect client and YARN shuffle artifacts is
+  authorized only if dependency updates alone do not clear the Trivy findings,
+  and runtime validation confirms they are not needed for the Kubernetes
+  target. No CRITICAL exception is granted; the fixable-CRITICAL Trivy gate
+  remains in force.
+scope:
+  - "Spark base image and runtime dependency resolution in RUSHA-SPARK-T001-P001 only"
+  - "Retain Spark 4.1.4, Scala 2.13.17, Python 3.12.16, Hadoop 3.4.2, and the approved connector versions."
+  - "Upgrade the build and runtime JDK to Java 21."
+  - "Override affected Netty, AWS SDK v2, and Derby dependencies only as necessary to clear the reported CRITICAL findings."
+  - "Remove only the optional Spark Connect client and YARN shuffle artifacts if required by the Trivy gate; validate the Kubernetes runtime without them."
+  - "No ECR, AWS infrastructure, GHCR access, Kubernetes, or deployment changes."
+controls:
+  - "Keep Spark 4.1.4 and the approved connector versions unchanged."
+  - "Preserve the CI Trivy policy that fails on fixable CRITICAL findings; no new exception is authorized."
+  - "Run runtime, S3A, Hadoop-native, Iceberg, Delta, and connector smoke tests after dependency changes."
+  - "Re-scan the final local image with CI-equivalent Trivy settings before any push."
+  - "Document and validate the absence of optional artifacts before removing them."
+  - "Do not push or open a PR until all local security and protocol gates pass."
+approved_by: user
+approved_at: "2026-11-06T17:47:28Z"
+success_measure: "Java 21 runtime and fixed dependencies pass the full local smoke suite and CI-equivalent Trivy scan with no fixable CRITICAL findings."
+rollback_ref: "cf979959904981dad31e0d6ad5c5d28693395590"
+review_owner: "Independent repository reviewer"
+review_at: "Pending before merge"

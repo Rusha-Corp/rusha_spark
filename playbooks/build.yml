@@ -2,10 +2,10 @@
   hosts: localhost
   vars:
     registry: "{{ lookup('env', 'DOCKER_REGISTRY') | default('', true) }}"
-    repo_name: "{{ lookup('env', 'DOCKER_REPO') | default('rusha-spark-3.5.3-base', true) }}"
+    repo_name: "{{ lookup('env', 'DOCKER_REPO') | default('rusha-spark-4.1-base', true) }}"
   tasks:
   - name: Get local git tag
-    command: git rev-parse --short HEAD
+    command: git rev-parse --short=7 HEAD
     register: git_tag
 
   - name: Build and Push (if registry set)
@@ -23,6 +23,7 @@
   - name: Build Locally (if registry not set)
     command: >
       docker buildx build
+      --load
       --platform linux/amd64
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t {{ repo_name }}:{{ git_tag.stdout }}

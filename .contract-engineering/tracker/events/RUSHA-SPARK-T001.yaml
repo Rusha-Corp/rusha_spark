@@ -1,0 +1,105 @@
+task_id: RUSHA-SPARK-T001
+schema_version: 1
+events:
+  - event_id: RUSHA-SPARK-T001-E001
+    packet_id: RUSHA-SPARK-T001-P001
+    type: created
+    actor: factory-droid
+    occurred_at: "2026-11-06T10:18:00Z"
+    summary: Created the Spark 4.1.4 and GHCR CI packet from the user-approved implementation spec.
+  - event_id: RUSHA-SPARK-T001-E002
+    packet_id: RUSHA-SPARK-T001-P001
+    type: claimed
+    actor: factory-droid
+    occurred_at: "2026-11-06T10:18:01Z"
+    summary: Claimed the isolated rusha_spark worktree and declared source, workflow, documentation, and protocol-record locks.
+  - event_id: RUSHA-SPARK-T001-E003
+    packet_id: RUSHA-SPARK-T001-P001
+    type: implementation_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T10:20:00Z"
+    summary: Completed the source, toolchain, code-health, and test baseline; recorded the user-approved design and threat model, then advanced to Implementing.
+  - event_id: RUSHA-SPARK-T001-E004
+    packet_id: RUSHA-SPARK-T001-P001
+    type: scope_changed
+    actor: user
+    occurred_at: "2026-11-06T10:52:57Z"
+    summary: Explicitly approved adding the removal of AWS credential-value logging from scripts/start_thrift_server.sh to the packet scope.
+  - event_id: RUSHA-SPARK-T001-E005
+    packet_id: RUSHA-SPARK-T001-P001
+    type: validation_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T14:01:50Z"
+    summary: Local image, runtime, code-health, workflow, and security checks passed; entering validation while hosted PR CI and independent DEC001 review remain pending.
+  - event_id: RUSHA-SPARK-T001-E006
+    packet_id: RUSHA-SPARK-T001-P001
+    type: rework_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T14:33:27Z"
+    summary: The CI-matched local Trivy scan found five fixable CRITICAL findings in Netty and Derby; recorded a blocking question on approved remediation scope, with no push or PR.
+  - event_id: RUSHA-SPARK-T001-E007
+    packet_id: RUSHA-SPARK-T001-P001
+    type: security_finding
+    actor: factory-droid
+    occurred_at: "2026-11-06T14:41:39Z"
+    summary: Pinned Spark and upstream Derby metadata show that a Trivy-clean fix requires a Java/dependency-matrix change and may require removing optional Connect/YARN artifacts; packet remains blocked in Rework pending user approval.
+  - event_id: RUSHA-SPARK-T001-E008
+    packet_id: RUSHA-SPARK-T001-P001
+    type: scope_changed
+    actor: user
+    occurred_at: "2026-11-06T17:47:28Z"
+    summary: Approved retaining Spark 4.1.4 while moving to Java 21 and overriding affected dependencies; optional Connect/YARN artifacts may be removed only if necessary.
+  - event_id: RUSHA-SPARK-T001-E009
+    packet_id: RUSHA-SPARK-T001-P001
+    type: state_transition
+    actor: factory-droid
+    occurred_at: "2026-11-06T17:47:28Z"
+    summary: Recorded DEC002, resolved OQ003, and moved the packet from Rework to Implementing; no dependency or artifact changes have been made yet.
+  - event_id: RUSHA-SPARK-T001-E010
+    packet_id: RUSHA-SPARK-T001-P001
+    type: implementation_progress
+    actor: factory-droid
+    occurred_at: "2026-11-06T19:25:55Z"
+    summary: Applied DEC002's Java 21 and fixed dependency overrides, excluded only the optional Connect client and YARN shuffle artifacts still reported by Trivy, and passed local runtime and critical-image scans; protocol and hosted CI gates remain.
+  - event_id: RUSHA-SPARK-T001-E011
+    packet_id: RUSHA-SPARK-T001-P001
+    type: implementation_committed
+    actor: factory-droid
+    occurred_at: "2026-11-06T19:52:55Z"
+    summary: Committed the DEC002 remediation as 2e1cce14094fed4d07c8b7de3dd3839eb0d1568f; post-commit history/protocol checks and hosted CI remain.
+  - event_id: RUSHA-SPARK-T001-E012
+    packet_id: RUSHA-SPARK-T001-P001
+    type: validation_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T20:00:55Z"
+    summary: Moved the packet from Implementing to Validation after local build, smoke, Trivy, Gitleaks history, and locked protocol/render checks passed; final record commit scans, hosted PR CI, and independent DEC001 review remain.
+  - event_id: RUSHA-SPARK-T001-E013
+    packet_id: RUSHA-SPARK-T001-P001
+    type: validation_progress
+    actor: factory-droid
+    occurred_at: "2026-11-06T20:11:55Z"
+    summary: Final post-commit Gitleaks history/worktree scans and locked protocol/tracker/render validators passed; Spark is ready for a PR, with hosted CI and independent DEC001 review required before merge.
+  - event_id: RUSHA-SPARK-T001-E014
+    packet_id: RUSHA-SPARK-T001-P001
+    type: rework_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T20:32:55Z"
+    summary: Hosted PR run 42288587320 failed during tool installation because CI used the obsolete github.com/gitleaks/gitleaks/v8 module path; downstream image jobs were skipped. Record the missed local verification of this exact install command and correct it before rerunning validation.
+  - event_id: RUSHA-SPARK-T001-E015
+    packet_id: RUSHA-SPARK-T001-P001
+    type: implementation_restarted
+    actor: factory-droid
+    occurred_at: "2026-11-06T20:50:55Z"
+    summary: Verified the corrected Gitleaks module path by installing v8.30.1 in an isolated Go 1.26.10 container; resumed implementation to update the workflow and rerun gates.
+  - event_id: RUSHA-SPARK-T001-E016
+    packet_id: RUSHA-SPARK-T001-P001
+    type: validation_started
+    actor: factory-droid
+    occurred_at: "2026-11-06T21:00:55Z"
+    summary: Corrected the Gitleaks install path; the exact Go install/version check, actionlint, make check/audit, secret scan, and locked protocol/tracker/projection checks passed. Returning to Validation; hosted PR checks remain pending.
+  - event_id: RUSHA-SPARK-T001-E017
+    packet_id: RUSHA-SPARK-T001-P001
+    type: validation_progress
+    actor: factory-droid
+    occurred_at: "2026-11-06T21:11:55Z"
+    summary: After correction commit 0dd299383f16df1c57fff070e879835738377286, Gitleaks scanned 181 commits and the working tree without leaks; enforced packet, tracker, and projection checks passed. Ready to push the correction and rerun PR CI.

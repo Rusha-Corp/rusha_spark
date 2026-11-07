@@ -1,0 +1,280 @@
+packet_id: RUSHA-SPARK-T001-P001
+task_id: RUSHA-SPARK-T001
+phase: P1_IMPLEMENTATION
+domain: security
+packet_class: single-domain
+work_type: delivery
+priority: high
+iteration: "2026-11-06"
+revision: 9
+lease_ref: null
+fencing_token: "RUSHA-SPARK-T001-P001-F001"
+worktree:
+  path: /tmp/rusha-spark-ghcr
+  branch: feat/spark-4.1.4-ghcr-ci
+  base_revision: 3f3271c9ef98793c3365011b108abc2edced114e
+  head_revision: 0dd299383f16df1c57fff070e879835738377286
+  cleanup_status: active
+title: Upgrade Rusha Spark base to 4.1.4 and publish through GHCR CI
+objective: Build and validate a Spark 4.1.4 base image with the approved connector versions, then publish short-SHA and 4.1.4 tags to GHCR from main-only CI with provenance and digest verification.
+open_questions:
+  - User must set the GHCR package public or grant lens-ETL read access before lens-ETL can consume the image.
+  - The scoped Trivy threshold exception requires independent reviewer acceptance before merge.
+  - id: RUSHA-SPARK-T001-P001-OQ003
+    question: May this packet change the approved Java/dependency matrix and, if needed, remove optional Spark Connect or YARN artifacts to remediate the five CRITICAL findings while retaining Spark 4.1.4? The current Java 17 Derby line has no verified fixed release; Derby 10.17.1.0 fixes the CVE but requires Java 21.
+    affects_criteria: [RUSHA-SPARK-T001-P001-AC001, RUSHA-SPARK-T001-P001-AC003]
+    owner: user
+    disposition: resolved
+    resolution_ref: RUSHA-SPARK-T001-P001-DEC002
+state: Validation
+scope:
+  in:
+    - Dockerfile
+    - Dockerfile.test
+    - build.sbt
+    - pyproject.toml
+    - poetry.lock
+    - Makefile
+    - local/build.sh
+    - playbooks/build.yml
+    - README.md
+    - .dockerignore
+    - .github/workflows/ci.yml
+    - scripts/ci/smoke-test.sh
+    - scripts/ci/check-runtime-jars.py
+    - scripts/start_thrift_server.sh
+    - .agent/skills/build-push-ecr/SKILL.md
+    - .agent/skills/runtime-libs-check/SKILL.md
+    - .agent/skills/hadoop-native-check/SKILL.md
+    - .factory/droids/ecr-image-builder.md
+    - .contract-engineering/
+  out:
+    - Spark application behavior in src/
+    - ECR repositories, IAM, and AWS infrastructure
+    - EKS/k3s resources, secrets, kubectl, or cluster rollout
+    - Changing GHCR package visibility or access grants
+    - Publishing from pull-request or workflow_dispatch runs
+    - Spark 4.3, Spark 4.1.1, or unapproved connector versions
+    - Deleting the legacy local ECR helper or changing release.sh behavior
+implementor:
+  agent_id: factory-droid
+  harness: Factory Droid
+  model: GPT-6 Luna
+  session_id: 2026-11-06-rusha-spark-ghcr
+capabilities:
+  - Modify only the isolated /tmp/rusha-spark-ghcr clone under the declared scope.
+  - Run local dependency, workflow, image, smoke, and security validation.
+  - Remove the two AWS credential-value log statements from scripts/start_thrift_server.sh; do not change credential inputs or startup behavior.
+  - Push the feature branch and open a PR; merge only after green CI as authorized by the approved spec.
+risk_tier: medium
+approval_policy: user
+external_effects:
+  - effect_id: RUSHA-SPARK-T001-P001-EE001
+    target: GitHub Container Registry
+    operation: Main-branch CI publishes the tested Spark image with short-SHA and 4.1.4 tags and build provenance.
+    data_classification: internal
+    approval_ref: User-approved spec 2026-11-06; merge authorized after green CI.
+    rollback: Revert the source/CI change and retain published immutable artifacts; do not change package visibility from the workflow.
+    declared: true
+    reversible: true
+  - effect_id: RUSHA-SPARK-T001-P001-EE002
+    target: GitHub repository
+    operation: Push a feature branch, open a PR, and merge after green CI.
+    data_classification: internal
+    approval_ref: User-approved spec 2026-11-06.
+    rollback: Revert the merged source change; do not rewrite published history.
+    declared: true
+    reversible: true
+owner:
+  identity: user
+  identity_type: human
+  authentication_ref: "User-approved spec and conversation approval, 2026-11-06"
+  signed_at: "2026-11-06"
+reviewer: user
+cleanup_owner: factory-droid
+dependencies: []
+locks:
+  - Dockerfile
+  - Dockerfile.test
+  - build.sbt
+  - pyproject.toml
+  - poetry.lock
+  - Makefile
+  - local/build.sh
+  - playbooks/build.yml
+  - README.md
+  - .dockerignore
+  - .github/workflows/ci.yml
+  - scripts/ci/smoke-test.sh
+  - scripts/ci/check-runtime-jars.py
+  - scripts/start_thrift_server.sh
+  - .agent/skills/build-push-ecr/SKILL.md
+  - .agent/skills/runtime-libs-check/SKILL.md
+  - .agent/skills/hadoop-native-check/SKILL.md
+  - .factory/droids/ecr-image-builder.md
+  - .contract-engineering/
+claim_timestamp: "2026-11-06T10:18:01Z"
+baseline_refs:
+  - .contract-engineering/protocol.lock.yaml
+  - 3f3271c9ef98793c3365011b108abc2edced114e
+  - approved spec: /home/vscode/.factory/specs/2026-11-06-spark-4-1-base-on-ghcr-ghcr-only-owa-ci-and-lens-etl-migration-prs.md
+  - .contract-engineering/evidence/RUSHA-SPARK-T001-P001-EV001.md
+  - Conversation approval 2026-11-06: remove AWS credential value logging from scripts/start_thrift_server.sh.
+design_decision_ref: "Approved spec 2026-11-06; RUSHA-SPARK-T001-P001-DEC002."
+data_gate_ref: null
+stability: stable
+deprecation_refs: []
+migration_dependencies: []
+removal_criteria: []
+exception_refs:
+  - RUSHA-SPARK-T001-P001-DEC001
+sunset_target: ""
+acceptance_criteria:
+  - The image uses Spark 4.1.4, Scala 2.13.17, Python 3.12.16, Hadoop 3.4.2, and Java 21, with connector versions from the approved spec.
+  - Image startup checks confirm the Spark runtime, connector jars, S3A class, Hadoop native code, and working Iceberg and Delta read/write paths.
+  - The Thrift entrypoint does not emit AWS credential values to logs.
+  - CI uses SHA-pinned actions, read-only permissions for PR validation, and a main-only GHCR publish job with packages: write scoped to that job.
+  - CI publishes the short-SHA and 4.1.4 tags with OCI source metadata and provenance, then verifies both remote tags resolve to the pushed digest.
+  - No ECR infrastructure, cluster resources, secrets, or deployment rollout are changed.
+acceptance_contract:
+  version: 1
+  criteria:
+    - id: RUSHA-SPARK-T001-P001-AC001
+      statement: The base image and dependency graph match the user-approved Spark 4.1.4 runtime matrix.
+      expected_result: Spark, Scala, Python, Java, Hadoop, AWS SDK v2, Netty, Derby, Iceberg, Nessie, Delta, and Unity Catalog versions are verified by the image smoke test and dependency resolution.
+      verification_method: execute
+      verification_command: Run the SBT build and scripts/ci/smoke-test.sh in the built test image.
+      evidence_refs: [RUSHA-SPARK-T001-P001-EV001, RUSHA-SPARK-T001-P001-EV003, RUSHA-SPARK-T001-P001-EV004]
+      failure_result: Any runtime or connector version differs from the approved matrix or fails to load.
+      validation_ref: RUSHA-SPARK-T001-P001-VAL001
+    - id: RUSHA-SPARK-T001-P001-AC002
+      statement: The runtime has no conflicting Hadoop or AWS SDK jar versions and performs the required storage smoke tests.
+      expected_result: The build-time jar-version checks pass; the smoke test initializes S3A without external access, loads Hadoop native libraries and the Kubernetes submission class, confirms the authorized optional artifact exclusions, and writes/reads Iceberg and Delta data locally.
+      verification_method: execute
+      verification_command: Run make validate against the local image.
+      evidence_refs: [RUSHA-SPARK-T001-P001-EV001, RUSHA-SPARK-T001-P001-EV003, RUSHA-SPARK-T001-P001-EV004]
+      failure_result: Duplicate conflicting jars or any storage smoke test failure.
+      validation_ref: RUSHA-SPARK-T001-P001-VAL002
+    - id: RUSHA-SPARK-T001-P001-AC003
+      statement: GHCR publishing is limited to validated main-branch commits and produces verifiable tags and provenance.
+      expected_result: Pull requests only validate; main publishing runs after the validation jobs, uses minimum write permissions, adds source/provenance metadata, and verifies remote digest equality.
+      verification_method: inspect
+      verification_command: Run actionlint, inspect workflow permissions and triggers, then inspect the hosted CI run and registry digest.
+      evidence_refs: [RUSHA-SPARK-T001-P001-EV001, RUSHA-SPARK-T001-P001-EV003, RUSHA-SPARK-T001-P001-EV004]
+      failure_result: PR or manual runs can publish, write permissions are broader than necessary, or the digest cannot be verified.
+      validation_ref: RUSHA-SPARK-T001-P001-VAL003
+    - id: RUSHA-SPARK-T001-P001-AC004
+      statement: The implementation does not mutate ECR, Kubernetes, or package access settings.
+      expected_result: The diff contains no AWS infrastructure or cluster operations; package visibility/access remains a user action.
+      verification_method: review
+      verification_command: Inspect the complete diff, workflow permissions, and recorded tool actions.
+      evidence_refs: [RUSHA-SPARK-T001-P001-EV001, RUSHA-SPARK-T001-P001-EV003]
+      failure_result: Any ECR resource, live cluster, secret, or package-visibility setting is changed by this packet.
+      validation_ref: RUSHA-SPARK-T001-P001-VAL004
+    - id: RUSHA-SPARK-T001-P001-AC005
+      statement: The Thrift entrypoint does not log AWS credential values.
+      expected_result: No startup log statement prints AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY values.
+      verification_method: inspect
+      verification_command: Search scripts/start_thrift_server.sh for credential-value log statements and run ShellCheck.
+      evidence_refs: [RUSHA-SPARK-T001-P001-EV002]
+      failure_result: Either AWS credential value is written to startup logs.
+      validation_ref: RUSHA-SPARK-T001-P001-VAL010
+validation_plan:
+  - id: RUSHA-SPARK-T001-P001-VAL001
+    kind: build
+    command: docker buildx build --platform linux/amd64 --load --tag rusha-spark-4.1-base:ci .
+    expected: Build succeeds, uses the checksum-verified Spark-distribution PySpark and Py4J files, and confirms the bundled Hadoop client matches the native libraries.
+  - id: RUSHA-SPARK-T001-P001-VAL002
+    kind: integration
+    command: make validate
+    expected: Version and dependency-jar checks pass; Hadoop native loading, local-only S3A initialization, Kubernetes submission class loading, authorized optional artifact exclusions, and Iceberg/Delta smoke checks pass.
+  - id: RUSHA-SPARK-T001-P001-VAL003
+    kind: security
+    skill: security-assurance
+    checks:
+      - Threat-model mitigations are implemented and verified.
+      - Gitleaks history and working-tree scans pass; workflow permissions are read-only for validation and package-write is limited to the main-only publish job.
+      - Per RUSHA-SPARK-T001-P001-DEC001, Trivy blocks fixable CRITICAL vulnerability findings; HIGH and unfixed findings are outside this approved CI gate and require independent reviewer acceptance before merge.
+      - Trivy license results are inventory only; no allow/deny policy is defined by the approved spec.
+    expected: The approved Trivy scan passes, the scoped exception receives independent review before merge, and no finding outside the exception is left unrecorded.
+  - id: RUSHA-SPARK-T001-P001-VAL004
+    kind: workflow
+    command: actionlint .github/workflows/ci.yml
+    expected: Workflow syntax and least-privilege trigger conditions pass.
+  - id: RUSHA-SPARK-T001-P001-VAL005
+    kind: tests
+    command: make check && make audit && shellcheck --severity=warning scripts/start_thrift_server.sh scripts/ci/smoke-test.sh local/build.sh
+    expected: Repository checks pass and changed shell scripts have no ShellCheck warning or error findings.
+  - id: RUSHA-SPARK-T001-P001-VAL006
+    kind: review
+    command: git diff --check
+    expected: Diff is whitespace-clean and matches packet scope.
+  - id: RUSHA-SPARK-T001-P001-VAL007
+    kind: hosted-ci
+    expected: All required PR checks are green; after authorized merge, the short-SHA and 4.1.4 GHCR tags resolve to the same published digest.
+  - id: RUSHA-SPARK-T001-P001-VAL008
+    kind: principles
+    skill: coding-principles
+    checks:
+      - Existing build, image, and release abstractions were reviewed before adding new behavior.
+      - The GHCR workflow remains separate from legacy local registry publishing.
+      - No unrequested Spark application logic or deployment behavior was added.
+    expected: The change is the simplest viable implementation and leaves no newly dead code.
+  - id: RUSHA-SPARK-T001-P001-VAL009
+    kind: dependency
+    command: poetry check --lock
+    expected: Poetry metadata and the PySpark 4.1.4/Py4J 0.10.9.9 lock entries validate.
+  - id: RUSHA-SPARK-T001-P001-VAL010
+    kind: security
+    command: '! grep -nE "echo.*AWS_(ACCESS_KEY_ID|SECRET_ACCESS_KEY)" scripts/start_thrift_server.sh'
+    expected: No AWS credential values are printed by the Thrift entrypoint.
+  - id: RUSHA-SPARK-T001-P001-VAL011
+    kind: protocol
+    command: Run the locked Contract Engineering v3.1.0 validators on this packet, the tracker, projections, and changed-path code health.
+    expected: Packet schemas, references, tracker partitions, generated projections, scope, and code-health records pass.
+trust_boundary_ref: .contract-engineering/threat-models/RUSHA-SPARK-T001-P001.yaml
+execution_budget_ref: null
+checkpoint_ref: null
+evaluation_ref: null
+agent_run_ref: null
+observability_refs: []
+incident_refs: []
+evidence_refs:
+  - RUSHA-SPARK-T001-P001-EV001
+  - RUSHA-SPARK-T001-P001-EV002
+  - RUSHA-SPARK-T001-P001-EV003
+  - RUSHA-SPARK-T001-P001-EV004
+  - RUSHA-SPARK-T001-P001-EV005
+handoff_ref: null
+skill_gaps: []
+cleanup_scope:
+  size_reviews:
+    - path: poetry.lock
+      lines: 3730
+      checkpoint: baseline
+      decision: retain
+      rationale: Poetry lockfiles are machine-generated dependency graphs; splitting them would invalidate the lock contract.
+    - path: poetry.lock
+      lines: 3764
+      checkpoint: handoff
+      decision: retain
+      rationale: The 34-line net change pins PySpark 4.1.4 and Py4J 0.10.9.9 for the runtime upgrade. A generated lockfile is kept intact to preserve reproducible dependency resolution.
+  dead_code_review:
+    - "baseline (2026-11-06): Dockerfile.test, Makefile, build metadata, and Spark version references reviewed; Dockerfile.test referenced four absent assets, and Makefile/runtime guidance retained Spark 3.5-era defaults."
+    - "handoff (2026-11-06): Reviewed the changed Docker, SBT, CI, smoke-test, local-helper, and documentation surfaces. Dockerfile.test's missing-asset references and stale Spark 3.5 defaults are replaced. Legacy ECR helpers remain intentionally retained and are not used by GHCR CI. No new unreachable code or unused dependency was identified."
+    - "security remediation (2026-11-06): Dependency updates left two fixable CRITICAL Trivy records in unused Spark Connect client and YARN shuffle artifact metadata. OWA and lens-ETL source searches found no corresponding workload references; the Kubernetes submission jar/class remains present and loads in smoke validation. DEC002 authorized excluding only the Connect client jars/shell and YARN shuffle jar."
+  dead_refs:
+    - path: Dockerfile.test
+      reference: test-data.json.gz, generate_concat_data.py, verify_concat_gzip.py, run_gzip_test.sh
+      decision: remove
+      rationale: The referenced files are absent; replace the broken test image with the approved runtime smoke test.
+    - path: Makefile
+      reference: rusha-spark-3.5.3-base and Spark 3.5 jar patterns
+      decision: remove
+      rationale: Replace stale image and jar references with Spark 4.1 defaults.
+    - path: Dockerfile
+      reference: Spark Connect client/JDBC jars and shell, plus YARN shuffle plugin in the Spark 4.1.4 distribution
+      decision: remove
+      rationale: These optional artifacts retained the two fixable CRITICAL Trivy records after dependency overrides; no OWA or lens-ETL workload uses them, and DEC002 authorized their exclusion while preserving Kubernetes submission.
+  stale_refs: []
+  temp_refs: []

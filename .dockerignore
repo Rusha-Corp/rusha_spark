@@ -2,6 +2,9 @@
 # DOCKER BUILD OPTIMIZATION
 # ===================================
 
+# Internal governance records and evidence are not runtime build inputs.
+.contract-engineering/
+
 # Version control
 .git/
 .gitignore

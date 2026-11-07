@@ -1,0 +1,33 @@
+tracker_schema_version: 1
+partition: active
+max_rows: 25
+updated_at: "2026-11-06"
+shards: []
+rows:
+  - task_id: RUSHA-SPARK-T001
+    packet_id: RUSHA-SPARK-T001-P001
+    state: Validation
+    owner: user
+    reviewer: user
+    locks:
+      - Dockerfile
+      - Dockerfile.test
+      - build.sbt
+      - pyproject.toml
+      - poetry.lock
+      - Makefile
+      - local/build.sh
+      - playbooks/build.yml
+      - README.md
+      - .dockerignore
+      - .github/workflows/ci.yml
+      - scripts/ci/smoke-test.sh
+      - scripts/ci/check-runtime-jars.py
+      - scripts/start_thrift_server.sh
+      - .agent/skills/build-push-ecr/SKILL.md
+      - .agent/skills/runtime-libs-check/SKILL.md
+      - .agent/skills/hadoop-native-check/SKILL.md
+      - .factory/droids/ecr-image-builder.md
+      - .contract-engineering/
+    next_action: Push the validated workflow correction to PR #1 and require full hosted CI; independent DEC001 reviewer acceptance remains required before merge.
+    updated_at: "2026-11-06"

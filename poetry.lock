@@ -2461,6 +2461,18 @@ files = [
 pyasn1 = ">=0.6.1,<0.7.0"
 
 [[package]]
+name = "py4j"
+version = "0.10.9.9"
+description = "Enables Python programs to dynamically access arbitrary Java objects"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "py4j-0.10.9.9-py2.py3-none-any.whl", hash = "sha256:c7c26e4158defb37b0bb124933163641a2ff6e3a3913f7811b0ddbe07ed61533"},
+    {file = "py4j-0.10.9.9.tar.gz", hash = "sha256:f694cad19efa5bd1dee4f3e5270eb406613c974394035e5bfc4ec1aba870b879"},
+]
+
+[[package]]
 name = "pycparser"
 version = "3.0"
 description = "C parser in Python"
@@ -2701,6 +2713,28 @@ files = [
     {file = "pywin32-311-cp39-cp39-win_amd64.whl", hash = "sha256:e0c4cfb0621281fe40387df582097fd796e80430597cb9944f0ae70447bacd91"},
     {file = "pywin32-311-cp39-cp39-win_arm64.whl", hash = "sha256:62ea666235135fee79bb154e695f3ff67370afefd71bd7fea7512fc70ef31e3d"},
 ]
+
+[[package]]
+name = "pyspark"
+version = "4.1.4"
+description = "Apache Spark Python API"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "pyspark-4.1.4.tar.gz", hash = "sha256:bcbd5e18690cf79d438e97210ad06fb8d451a251bb77becc2b0418868d2acd73"},
+]
+
+[package.dependencies]
+py4j = ">=0.10.9.7,<0.10.9.10"
+
+[package.extras]
+connect = ["googleapis-common-protos (>=1.71.0)", "grpcio (>=1.76.0)", "grpcio-status (>=1.76.0)", "numpy (>=1.21)", "pandas (>=2.2.0)", "pyarrow (>=15.0.0)", "zstandard (>=0.25.0)"]
+ml = ["numpy (>=1.21)"]
+mllib = ["numpy (>=1.21)"]
+pandas-on-spark = ["numpy (>=1.21)", "pandas (>=2.2.0)", "pyarrow (>=15.0.0)"]
+pipelines = ["googleapis-common-protos (>=1.71.0)", "grpcio (>=1.76.0)", "grpcio-status (>=1.76.0)", "numpy (>=1.21)", "pandas (>=2.2.0)", "pyarrow (>=15.0.0)", "pyyaml (>=3.11)", "zstandard (>=0.25.0)"]
+sql = ["numpy (>=1.21)", "pandas (>=2.2.0)", "pyarrow (>=15.0.0)"]
 
 [[package]]
 name = "pyyaml"
@@ -3726,5 +3760,5 @@ type = ["pytest-mypy"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = "^3.11"
-content-hash = "f94f64bc75ea636f16beb3317ddaf167a9125d2991487f1484cc656609d05e18"
+python-versions = "^3.12"
+content-hash = "a6965cdbc3f794ba235973b2681f317d88d131827fa75040a86a8c69658730e1"
